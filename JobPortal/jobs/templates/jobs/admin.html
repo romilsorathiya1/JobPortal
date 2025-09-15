@@ -1,0 +1,217 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Job Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'jobs/css/admin_panel.css' %}">
+</head>
+<body>
+
+    <header class="global-header">
+        <div class="container">
+            <a href="{% url 'admin_panel' %}" class="logo">JobPortal Admin</a> {# Link to admin_panel #}
+            <div class="header-actions">
+                <button class="menu-toggle" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <a href="#" class="btn btn-outline">Logout</a> {# This would typically go to a Django logout URL #}
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="admin-layout-wrapper">
+            <nav class="sidebar" id="sidebar">
+                <div class="sidebar-nav">
+                    <ul>
+                        <li><a href="#" class="nav-link active" data-view="dashboard-view"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                        <li><a href="#" class="nav-link" data-view="seekers-view"><i class="fas fa-users"></i> <span>Job Seekers</span></a></li>
+                        <li><a href="#" class="nav-link" data-view="companies-view"><i class="fas fa-building"></i> <span>Companies</span></a></li>
+                        <li><a href="#" class="nav-link" data-view="jobs-view"><i class="fas fa-briefcase"></i> <span>Jobs</span></a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="main-content">
+                <div class="content-wrapper">
+                    <!-- VIEW: Dashboard -->
+                    <div id="dashboard-view" class="view active">
+                        <h1 class="page-title">Dashboard</h1>
+                        <div class="stats-grid">
+                           <div class="stat-card">
+                                <div class="stat-title"><span>Total Job Seekers</span><i class="fas fa-users stat-icon"></i></div>
+                                <div class="stat-value" id="total-seekers">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title"><span>Total Companies</span><i class="fas fa-building stat-icon"></i></div>
+                                <div class="stat-value" id="total-companies">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title"><span>Total Jobs Posted</span><i class="fas fa-briefcase stat-icon"></i></div>
+                                <div class="stat-value" id="total-jobs">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title"><span>Total Hired</span><i class="fas fa-user-check stat-icon"></i></div>
+                                <div class="stat-value" id="total-hired">0</div>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-header"><h2 class="panel-title">Platform Growth (Last 6 Months)</h2></div>
+                            <canvas id="growthChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- VIEW: Job Seekers List -->
+                    <div id="seekers-view" class="view">
+                        <h1 class="page-title">Job Seekers</h1>
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title">All Registered Job Seekers</h2>
+                                <button class="btn" id="add-seeker-btn">Add New Seeker</button>
+                            </div>
+                            <div class="table-controls"><input type="text" placeholder="Search seekers by name, email..." class="search-bar" id="seeker-search"></div>
+                            <div class="table-responsive"><table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined On</th><th>Actions</th></tr></thead><tbody id="seekers-table-body"></tbody></table></div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW: Companies List -->
+                    <div id="companies-view" class="view">
+                         <h1 class="page-title">Companies</h1>
+                         <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title">All Registered Companies</h2>
+                                 <button class="btn" id="add-company-btn">Add New Company</button>
+                            </div>
+                            <div class="table-controls"><input type="text" placeholder="Search companies by name, industry..." class="search-bar" id="company-search"></div>
+                            <div class="table-responsive"><table class="data-table"><thead><tr><th>Company Name</th><th>Industry</th><th>Location</th><th>Joined On</th><th>Actions</th></tr></thead><tbody id="companies-table-body"></tbody></table></div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW: Jobs List -->
+                    <div id="jobs-view" class="view">
+                        <h1 class="page-title">Jobs</h1>
+                         <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title">Active Job Listings</h2>
+                                 <button class="btn" id="add-job-btn">Post New Job</button>
+                            </div>
+                            <div class="table-controls"><input type="text" placeholder="Search jobs by title, company..." class="search-bar" id="job-search"></div>
+                            <div class="table-responsive"><table class="data-table"><thead><tr><th>Job Title</th><th>Company</th><th>Applicants</th><th>Actions</th></tr></thead><tbody id="jobs-table-body"></tbody></table></div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW: Applicants List for a Specific Job -->
+                    <div id="applicants-view" class="view">
+                        <h1 class="page-title" id="applicants-page-title">Job Applicants</h1>
+                        <div class="panel">
+                            <div class="panel-header">
+                                <div>
+                                   <h2 class="panel-title" id="applicants-job-title">Applicants</h2>
+                                   <p id="applicants-job-count" style="color: var(--text-light-color); margin-top: 5px;"></p>
+                                </div>
+                                <button class="btn btn-outline" id="back-to-jobs-btn"><i class="fas fa-arrow-left"></i> Back to Jobs</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Applied On</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="applicants-table-body">
+                                        <!-- Populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- FORM VIEWS START -->
+                    <!-- VIEW: Seeker Add/Edit Form -->
+                    <div id="seeker-form-view" class="view">
+                        <div class="panel">
+                            <div class="panel-header"><h2 class="panel-title" id="seeker-form-title">Add New Seeker</h2></div>
+                            <form id="seeker-form" class="data-form">
+                                <input type="hidden" id="seeker-id-input">
+                                <div class="form-group"><label for="seeker-name">Full Name</label><input type="text" id="seeker-name" class="form-control" required></div>
+                                <div class="form-group"><label for="seeker-email">Email Address</label><input type="email" id="seeker-email" class="form-control" required></div>
+                                <div class="form-group"><label for="seeker-phone">Phone Number</label><input type="tel" id="seeker-phone" class="form-control" required></div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-outline" id="cancel-seeker-form">Cancel</button>
+                                    <button type="submit" class="btn">Save Seeker</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- VIEW: Company Add/Edit Form -->
+                     <div id="company-form-view" class="view">
+                        <div class="panel">
+                            <div class="panel-header"><h2 class="panel-title" id="company-form-title">Add New Company</h2></div>
+                            <form id="company-form" class="data-form">
+                                <input type="hidden" id="company-id-input">
+                                <div class="form-group"><label for="company-name">Company Name</label><input type="text" id="company-name" class="form-control" required></div>
+                                <div class="form-group"><label for="company-industry">Industry</label><input type="text" id="company-industry" class="form-control" required></div>
+                                <div class="form-group"><label for="company-location">Location</label><input type="text" id="company-location" class="form-control" required></div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-outline" id="cancel-company-form">Cancel</button>
+                                    <button type="submit" class="btn">Save Company</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- VIEW: Job Add/Edit Form -->
+                     <div id="job-form-view" class="view">
+                        <div class="panel">
+                            <div class="panel-header"><h2 class="panel-title" id="job-form-title">Post New Job</h2></div>
+                            <form id="job-form" class="data-form">
+                                <input type="hidden" id="job-id-input">
+                                <div class="form-group"><label for="job-title">Job Title</label><input type="text" id="job-title" class="form-control" required></div>
+
+                                <!-- CUSTOM SELECT FOR COMPANY -->
+                                <div class="form-group">
+                                    <label for="job-company-select">Company</label>
+                                    <input type="hidden" id="job-company-hidden" required>
+                                    <div class="custom-select-wrapper">
+                                        <div class="custom-select" id="job-company-select">
+                                            <div class="custom-select__trigger"><span>Select a company...</span></div>
+                                            <ul class="custom-select__options">
+                                                <!-- Populated by JS -->
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-outline" id="cancel-job-form">Cancel</button>
+                                    <button type="submit" class="btn">Save Job</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- FORM VIEWS END -->
+
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container"><div class="footer-content"><div class="footer-section"><h3>About Us</h3><p>We are dedicated to connecting talented individuals with their dream jobs.</p></div><div class="footer-section"><h3>Quick Links</h3><ul><li><a href="#">Jobs</a></li><li><a href="#">Companies</a></li><li><a href="#">About</a></li></ul></div><div class="footer-section"><h3>Follow Us</h3><ul><li><a href="#">Facebook</a></li><li><a href="#">Twitter</a></li><li><a href="#">LinkedIn</a></li></ul></div></div><div class="footer-bottom"><p>&copy; 2025 Job Portal. All rights reserved.</p></div></div>
+    </footer>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'jobs/js/admin_panel.js' %}"></script>
+</body>
+</html>

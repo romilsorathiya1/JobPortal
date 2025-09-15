@@ -1,0 +1,140 @@
+/* --- Authentication Modal Styles --- */
+
+/* The Modal Overlay */
+.auth-modal-overlay {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1050; /* Sit on top, higher than header */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    backdrop-filter: blur(5px); /* Optional: blur background */
+    -webkit-backdrop-filter: blur(5px); /* Safari support */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.auth-modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+/* Modal Content Box */
+.auth-modal-content {
+    background-color: var(--white-color);
+    margin: auto;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 450px;
+    position: relative;
+    transform: translateY(-50px); /* Start slightly above center */
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+.auth-modal-overlay.active .auth-modal-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Close button */
+.auth-modal-close-btn {
+    color: var(--text-light-color);
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 1.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+.auth-modal-close-btn:hover,
+.auth-modal-close-btn:focus {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+/* Form Styles within Modal */
+.auth-modal-title {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    text-align: center;
+    color: var(--primary-color);
+}
+
+.auth-form-group {
+    margin-bottom: 20px;
+}
+
+.auth-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.auth-form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.auth-form-group input:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.auth-form-submit-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: var(--secondary-color);
+    color: var(--white-color);
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    margin-top: 25px;
+}
+
+.auth-form-submit-btn:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(44, 62, 80, 0.2);
+}
+
+.auth-form-footer-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+.auth-form-footer-link:hover {
+    color: var(--primary-color);
+}
+
+/* Form Switching */
+.auth-modal-content > div {
+    display: none; /* Hide all form sections by default */
+}
+.auth-modal-content > div.active {
+    display: block; /* Show active form section */
+}

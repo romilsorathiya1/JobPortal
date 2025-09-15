@@ -1,0 +1,116 @@
+{% extends 'jobs/base.html' %}
+{% load static %}
+
+{% block title %}Find Jobs - Job Application Portal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'jobs/css/findjobs.css' %}">
+{% endblock %}
+
+{% block content %}
+    <main class="container jobs-page-layout">
+        <aside class="filters-sidebar" id="filters-sidebar">
+            <!-- New wrapper for scrollable content -->
+            <div class="filter-scroll-area">
+                <div class="filter-group">
+                    <h3>Search</h3>
+                    <input type="text" id="keywords" placeholder="Keywords, Title, Company">
+                </div>
+                <div class="filter-group">
+                    <h3>Location</h3>
+                    <input type="text" id="location" placeholder="City, State, or Zip Code">
+                </div>
+                <div class="filter-group">
+                    <h3>Job Type</h3>
+                    <div class="checkbox-group" id="job-type">
+                        <label><input type="checkbox" name="job_type" value="Full-time"> Full-time</label>
+                        <label><input type="checkbox" name="job_type" value="Part-time"> Part-time</label>
+                        <label><input type="checkbox" name="job_type" value="Contract"> Contract</label>
+                        <label><input type="checkbox" name="job_type" value="Internship"> Internship</label>
+                        <label><input type="checkbox" name="job_type" value="Remote"> Remote</label>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <h3>Experience Level</h3>
+                    <div class="custom-select-wrapper">
+                        {# The actual select element is kept but visually hidden, JS creates a custom one #}
+                        <select id="experience-level">
+                            <option value="">Any Experience</option>
+                            <option value="Entry Level">Entry Level</option>
+                            <option value="Mid Level">Mid Level</option>
+                            <option value="Senior Level">Senior Level</option>
+                            <option value="Director">Director</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label for="salary-range" class="salary-range-label">
+                        <h3>Salary Min</h3>
+                        <span id="salary-value">$0k</span>
+                    </label>
+                    <input type="range" id="salary-range" min="0" max="250" value="0">
+                </div>
+                <div class="filter-group">
+                    <h3>Industry</h3>
+                    <div class="checkbox-group" id="industry-type">
+                        <label><input type="checkbox" name="industry_type" value="Technology"> Technology</label>
+                        <label><input type="checkbox" name="industry_type" value="Healthcare"> Healthcare</label>
+                        <label><input type="checkbox" name="industry_type" value="Finance"> Finance</label>
+                        <label><input type="checkbox" name="industry_type" value="Education"> Education</label>
+                        <label><input type="checkbox" name="industry_type" value="Retail"> Retail</label>
+                        {# Added 'Entertainment', 'Aerospace', 'Automotive', 'Consumer Goods', 'Food Service' from jobsData for full functionality #}
+                        <label><input type="checkbox" name="industry_type" value="Entertainment"> Entertainment</label>
+                        <label><input type="checkbox" name="industry_type" value="Aerospace"> Aerospace</label>
+                        <label><input type="checkbox" name="industry_type" value="Automotive"> Automotive</label>
+                        <label><input type="checkbox" name="industry_type" value="Consumer Goods"> Consumer Goods</label>
+                        <label><input type="checkbox" name="industry_type" value="Food Service"> Food Service</label>
+                    </div>
+                </div>
+                 <div class="filter-group">
+                    <h3>Company Size</h3>
+                    <div class="checkbox-group" id="company-size">
+                        <label><input type="checkbox" name="company_size" value="1-50"> 1-50 Employees</label>
+                        <label><input type="checkbox" name="company_size" value="51-200"> 51-200 Employees</label>
+                        <label><input type="checkbox" name="company_size" value="201-1000"> 201-1000 Employees</label>
+                        <label><input type="checkbox" name="company_size" value="1001+"> 1001+ Employees</label>
+                    </div>
+                </div>
+            </div>
+            <!-- New wrapper for the button -->
+            <div class="filter-actions">
+                <button class="reset-filters-btn" id="reset-filters">Reset Filters</button>
+            </div>
+        </aside>
+
+        <section class="job-listings-section">
+            <div class="mobile-filter-header">
+                 <button id="mobile-filter-btn"><i class="fas fa-filter"></i> Filters</button>
+                 <span class="results-count" id="mobile-results-count"></span>
+            </div>
+
+            <div class="listings-header">
+                <span class="results-count" id="results-count-display"></span>
+                <div class="sort-by">
+                    <label for="sort-options">Sort by:</label>
+                    <div class="custom-select-wrapper">
+                        {# The actual select element is kept but visually hidden, JS creates a custom one #}
+                        <select id="sort-options">
+                            <option value="relevance">Relevance</option>
+                            <option value="date">Date</option>
+                            <option value="salary">Salary</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="job-card-container" id="job-listings"></div>
+            <div class="pagination" id="pagination"></div>
+        </section>
+    </main>
+
+    <div class="backdrop" id="backdrop"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'jobs/js/findjobs.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'jobs/base.html' %}
+{% load static %}
+
+{% block title %}Top Companies - Job Application Portal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'jobs/css/companies.css' %}">
+{% endblock %}
+
+{% block content %}
+    <section class="companies-hero">
+        <h1>Discover Top Companies</h1>
+        <p>Browse through companies that are actively hiring. Find your next great opportunity with an employer you'll love.</p>
+    </section>
+
+    <div class="container">
+        <section class="filters-section">
+            <div class="company-filters">
+                <div class="filter-item keyword">
+                    <i class="fas fa-search filter-icon"></i>
+                    <input type="text" id="company-keyword" placeholder="Search by company name...">
+                </div>
+                <span class="separator"></span>
+                <div class="filter-item location">
+                    <i class="fas fa-map-marker-alt filter-icon"></i>
+                    <input type="text" id="company-location" placeholder="Search by location...">
+                </div>
+                <span class="separator"></span>
+                <div class="filter-item industry">
+                    <i class="fas fa-briefcase filter-icon"></i>
+                    <div class="custom-select-wrapper">
+                        <div class="custom-select" id="custom-industry-select">
+                            <div class="custom-select__trigger"><span>All Industries</span></div>
+                            <ul class="custom-select__options">
+                                <li class="custom-select__option selected" data-value="">All Industries</li>
+                                <li class="custom-select__option" data-value="Technology">Technology</li>
+                                <li class="custom-select__option" data-value="Finance">Finance</li>
+                                <li class="custom-select__option" data-value="Healthcare">Healthcare</li>
+                                <li class="custom-select__option" data-value="Retail">Retail</li>
+                                <li class="custom-select__option" data-value="Design">Design</li>
+                            </ul>
+                        </div>
+                    </div>
+                    {# The original <select> is kept for JS to interact with, but hidden #}
+                    <select id="company-industry" style="display: none;">
+                        <option value="">All Industries</option>
+                        <option value="Technology">Technology</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Retail">Retail</option>
+                        <option value="Design">Design</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="company-grid-section">
+            <div class="company-grid" id="company-grid">
+                <!-- Company cards will be dynamically inserted here by JavaScript -->
+            </div>
+            <div class="pagination" id="pagination">
+                <!-- Pagination links will be dynamically inserted here by JavaScript -->
+            </div>
+        </section>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'jobs/js/companies.js' %}"></script>
+{% endblock %}

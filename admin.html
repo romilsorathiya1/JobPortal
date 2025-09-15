@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Job Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --light-color: #f8f9f9;
+            --dark-color: #212f3d;
+            --white-color: #ffffff;
+            --text-color: #34495e;
+            --text-light-color: #7f8c8d;
+            --border-color: #e0e0e0;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+            background-color: var(--light-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        main {
+            flex-grow: 1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            padding: 0 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: var(--secondary-color);
+            color: var(--white-color);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .btn:hover { background: var(--primary-color); }
+        .btn-outline {
+            background: transparent;
+            color: var(--secondary-color);
+            border: 1px solid var(--secondary-color);
+        }
+        .btn-outline:hover { background: var(--secondary-color); color: var(--white-color); }
+
+        /* --- Global Header --- */
+        .global-header {
+            background: var(--white-color);
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+            position: sticky;
+            top: 0;
+        }
+        .global-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        /* --- Admin Panel Layout --- */
+        .admin-layout-wrapper {
+            display: flex;
+            gap: 30px;
+            padding: 30px 20px;
+            width: 100%;
+            align-items: flex-start;
+            box-sizing: border-box;
+        }
+
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            background-color: var(--white-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+            padding: 20px;
+            box-sizing: border-box;
+            position: sticky;
+            height: calc(100vh - 121px);
+            top: 91px; 
+            overflow-y: auto;
+        }
+        
+        .sidebar-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.3s;
+            margin-bottom: 5px;
+        }
+        .sidebar-nav a:hover {
+            background-color: var(--light-color);
+        }
+        .sidebar-nav a.active {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+        }
+        .sidebar-nav a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            min-width: 0; /* Prevents flex item from overflowing */
+        }
+
+        .content-wrapper {
+            padding-right: 15px;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+        
+        .view { display: none; }
+        .view.active { display: block; }
+        
+        .panel {
+            background: var(--white-color);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap; /* Allows items to wrap on smaller screens */
+            gap: 15px; /* Adds space between wrapped items */
+        }
+        .panel-title { font-size: 1.5rem; }
+
+        /* Dashboard Styles */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: var(--white-color);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .stat-card .stat-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: var(--text-light-color);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .stat-card .stat-icon { font-size: 1.5rem; color: var(--secondary-color); }
+        .stat-card .stat-value { font-size: 2.2rem; font-weight: 600; }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        /* Table Styles */
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .search-bar {
+            width: 100%; /* Full width on mobile */
+            max-width: 300px; /* Max width on desktop */
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+        }
+        .table-responsive { overflow-x: auto; } /* This enables horizontal scrolling for the table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        .data-table th, .data-table td {
+            padding: 15px;
+            vertical-align: middle;
+            white-space: nowrap; /* Prevents text wrapping in cells */
+        }
+        .data-table thead { background: var(--light-color); }
+        .data-table th { font-weight: 600; }
+        .data-table tbody tr { border-bottom: 1px solid var(--border-color); }
+        .data-table tbody tr:hover { background-color: #fdfdfd; }
+        .action-buttons button {
+            background: none; border: none; cursor: pointer; color: var(--text-light-color); font-size: 1.1rem; padding: 5px; margin: 0 5px;
+        }
+        .action-buttons button:hover { color: var(--secondary-color); }
+        
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1999;
+        }
+        .sidebar-overlay.active {
+            display: block;
+        }
+        
+        /* --- Form Styles --- */
+        .data-form .form-group { margin-bottom: 20px; }
+        .data-form .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .data-form .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .data-form .form-control:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+        }
+        .data-form .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        
+        /* --- Custom Select Styles --- */
+        .custom-select-wrapper { 
+            position: relative; 
+            width: 100%; /* Default to full width */
+        }
+        .custom-select { font-size: 0.95rem; }
+        .custom-select__trigger {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            background: var(--white-color);
+            transition: border-color 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .custom-select__trigger:after {
+            content: '\f078';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+        .custom-select.open .custom-select__trigger { border-color: var(--secondary-color); }
+        .custom-select.open .custom-select__trigger:after { transform: rotate(180deg); }
+        .custom-select__options {
+            position: absolute;
+            top: 110%; left: 0; right: 0;
+            background: var(--white-color);
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 10;
+            list-style: none;
+            padding: 5px 0; margin: 0;
+            opacity: 0; visibility: hidden;
+            transform: translateY(10px);
+            transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .custom-select.open .custom-select__options {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .custom-select__option {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .custom-select__option:hover, .custom-select__option.selected {
+            background-color: var(--light-color);
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+        
+        /* --- Footer Styles --- */
+        .main-footer {
+            background: var(--dark-color);
+            color: var(--light-color);
+            padding: 50px 0 20px;
+        }
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .footer-section h3 {
+            margin-bottom: 20px;
+            color: var(--white-color);
+        }
+        .footer-section p { color: var(--text-light-color); }
+        .footer-section ul { padding: 0; list-style: none; }
+        .footer-section ul li { margin-bottom: 10px; }
+        .footer-section ul li a {
+            color: var(--text-light-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .footer-section ul li a:hover { color: var(--secondary-color); }
+        .footer-bottom {
+            text-align: center;
+            border-top: 1px solid #444;
+            padding-top: 20px;
+        }
+        .footer-bottom p {
+            margin: 0;
+            color: var(--text-light-color);
+            font-size: 0.9rem;
+        }
+
+        /* --- RESPONSIVE STYLES --- */
+        @media (max-width: 992px) {
+            body { overflow-x: hidden; } /* Prevent horizontal scroll on body */
+            main { overflow: visible; }
+            .menu-toggle { display: block; }
+            .admin-layout-wrapper { padding: 15px; gap: 0; }
+            .sidebar {
+                position: fixed; top: 0; left: 0; height: 100vh;
+                z-index: 2000; transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                border-radius: 0; box-shadow: none; border: none;
+                border-right: 1px solid var(--border-color);
+                width: 280px; max-height: 100vh;
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { padding-left: 0; overflow-y: visible; height: auto; }
+        }
+        @media (max-width: 768px) {
+            .stats-grid, .dashboard-grid { grid-template-columns: 1fr; }
+            .page-title { font-size: 1.4rem; }
+            .footer-content { text-align: center; }
+            .panel { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="global-header">
+        <div class="container">
+            <a href="#" class="logo">JobPortal</a>
+            <div class="header-actions">
+                <button class="menu-toggle" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <a href="#" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <div class="admin-layout-wrapper">
+            <nav class="sidebar" id="sidebar">
+                <div class="sidebar-nav">
+                    <ul>
+                        <li><a href="#" class="nav-link active" data-view="dashboard-view"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                        <li><a href="#" class="nav-link" data-view="seekers-view"><i class="fas fa-users"></i> <span>Job Seekers</span></a></li>
+                        <li><a href="#" class="nav-link" data-view="companies-view"><i class="fas fa-building"></i> <span>Companies</span></a></li>
+                        <li><a href="#" class="nav-link" data-view="jobs-view"><i class="fas fa-briefcase"></i> <span>Jobs</span></a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="main-content">
+                <div class="content-wrapper">
+                    <!-- Title is now managed by JS -->
+
+                    <!-- VIEW: Dashboard -->
+                    <div id="dashboard-view" class="view active">
+                        <h1 class="page-title">Dashboard</h1>
+                        <div class="stats-grid">
+                           <div class="stat-card">
+                                <div class="stat-title"><span>Total Job Seekers</span><i class="fas fa-users stat-icon"></i></div>
+                                <div class="stat-value" id="total-seekers">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title"><span>Total Companies</span><i class="fas fa-building stat-icon"></i></div>
+                                <div class="stat-value" id="total-companies">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title"><span>Total Jobs Posted</span><i class="fas fa-briefcase stat-icon"></i></div>
+                                <div class="stat-value" id="total-jobs">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title"><span>Total Hired</span><i class="fas fa-user-check stat-icon"></i></div>
+                                <div class="stat-value" id="total-hired">0</div>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-header"><h2 class="panel-title">Platform Growth (Last 6 Months)</h2></div>
+                            <canvas id="growthChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- VIEW: Job Seekers List -->
+                    <div id="seekers-view" class="view">
+                        <h1 class="page-title">Job Seekers</h1>
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title">All Registered Job Seekers</h2>
+                                <button class="btn" id="add-seeker-btn">Add New Seeker</button>
+                            </div>
+                            <div class="table-controls"><input type="text" placeholder="Search seekers by name, email..." class="search-bar" id="seeker-search"></div>
+                            <div class="table-responsive"><table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined On</th><th>Actions</th></tr></thead><tbody id="seekers-table-body"></tbody></table></div>
+                        </div>
+                    </div>
+                    
+                    <!-- VIEW: Companies List -->
+                    <div id="companies-view" class="view">
+                         <h1 class="page-title">Companies</h1>
+                         <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title">All Registered Companies</h2>
+                                 <button class="btn" id="add-company-btn">Add New Company</button>
+                            </div>
+                            <div class="table-controls"><input type="text" placeholder="Search companies by name, industry..." class="search-bar" id="company-search"></div>
+                            <div class="table-responsive"><table class="data-table"><thead><tr><th>Company Name</th><th>Industry</th><th>Location</th><th>Joined On</th><th>Actions</th></tr></thead><tbody id="companies-table-body"></tbody></table></div>
+                        </div>
+                    </div>
+                    
+                    <!-- VIEW: Jobs List -->
+                    <div id="jobs-view" class="view">
+                        <h1 class="page-title">Jobs</h1>
+                         <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title">Active Job Listings</h2>
+                                 <button class="btn" id="add-job-btn">Post New Job</button>
+                            </div>
+                            <div class="table-controls"><input type="text" placeholder="Search jobs by title, company..." class="search-bar" id="job-search"></div>
+                            <div class="table-responsive"><table class="data-table"><thead><tr><th>Job Title</th><th>Company</th><th>Applicants</th><th>Actions</th></tr></thead><tbody id="jobs-table-body"></tbody></table></div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW: Applicants List for a Specific Job -->
+                    <div id="applicants-view" class="view">
+                        <h1 class="page-title" id="applicants-page-title">Job Applicants</h1>
+                        <div class="panel">
+                            <div class="panel-header">
+                                <div>
+                                   <h2 class="panel-title" id="applicants-job-title">Applicants</h2>
+                                   <p id="applicants-job-count" style="color: var(--text-light-color); margin-top: 5px;"></p>
+                                </div>
+                                <button class="btn btn-outline" id="back-to-jobs-btn"><i class="fas fa-arrow-left"></i> Back to Jobs</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Applied On</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="applicants-table-body">
+                                        <!-- Populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- FORM VIEWS START -->
+                    <!-- VIEW: Seeker Add/Edit Form -->
+                    <div id="seeker-form-view" class="view">
+                        <div class="panel">
+                            <div class="panel-header"><h2 class="panel-title" id="seeker-form-title">Add New Seeker</h2></div>
+                            <form id="seeker-form" class="data-form">
+                                <input type="hidden" id="seeker-id-input">
+                                <div class="form-group"><label for="seeker-name">Full Name</label><input type="text" id="seeker-name" class="form-control" required></div>
+                                <div class="form-group"><label for="seeker-email">Email Address</label><input type="email" id="seeker-email" class="form-control" required></div>
+                                <div class="form-group"><label for="seeker-phone">Phone Number</label><input type="tel" id="seeker-phone" class="form-control" required></div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-outline" id="cancel-seeker-form">Cancel</button>
+                                    <button type="submit" class="btn">Save Seeker</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- VIEW: Company Add/Edit Form -->
+                     <div id="company-form-view" class="view">
+                        <div class="panel">
+                            <div class="panel-header"><h2 class="panel-title" id="company-form-title">Add New Company</h2></div>
+                            <form id="company-form" class="data-form">
+                                <input type="hidden" id="company-id-input">
+                                <div class="form-group"><label for="company-name">Company Name</label><input type="text" id="company-name" class="form-control" required></div>
+                                <div class="form-group"><label for="company-industry">Industry</label><input type="text" id="company-industry" class="form-control" required></div>
+                                <div class="form-group"><label for="company-location">Location</label><input type="text" id="company-location" class="form-control" required></div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-outline" id="cancel-company-form">Cancel</button>
+                                    <button type="submit" class="btn">Save Company</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- VIEW: Job Add/Edit Form -->
+                     <div id="job-form-view" class="view">
+                        <div class="panel">
+                            <div class="panel-header"><h2 class="panel-title" id="job-form-title">Post New Job</h2></div>
+                            <form id="job-form" class="data-form">
+                                <input type="hidden" id="job-id-input">
+                                <div class="form-group"><label for="job-title">Job Title</label><input type="text" id="job-title" class="form-control" required></div>
+                                
+                                <!-- CUSTOM SELECT FOR COMPANY -->
+                                <div class="form-group">
+                                    <label for="job-company-select">Company</label>
+                                    <input type="hidden" id="job-company-hidden" required>
+                                    <div class="custom-select-wrapper">
+                                        <div class="custom-select" id="job-company-select">
+                                            <div class="custom-select__trigger"><span>Select a company...</span></div>
+                                            <ul class="custom-select__options">
+                                                <!-- Populated by JS -->
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-outline" id="cancel-job-form">Cancel</button>
+                                    <button type="submit" class="btn">Save Job</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- FORM VIEWS END -->
+
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    </main>
+    
+    <footer class="main-footer">
+        <div class="container"><div class="footer-content"><div class="footer-section"><h3>About Us</h3><p>We are dedicated to connecting talented individuals with their dream jobs.</p></div><div class="footer-section"><h3>Quick Links</h3><ul><li><a href="#">Jobs</a></li><li><a href="#">Companies</a></li><li><a href="#">About</a></li></ul></div><div class="footer-section"><h3>Follow Us</h3><ul><li><a href="#">Facebook</a></li><li><a href="#">Twitter</a></li><li><a href="#">LinkedIn</a></li></ul></div></div><div class="footer-bottom"><p>&copy; 2025 Job Portal. All rights reserved.</p></div></div>
+    </footer>
+    
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- DATA SIMULATION ---
+    let jobSeekers = [
+        { id: 1, name: "Priya Sharma", email: "priya.s@example.com", phone: "9876543210", joined: "2025-08-20" },
+        { id: 2, name: "Rohan Patel", email: "rohan.p@example.com", phone: "9876543211", joined: "2025-08-18" },
+        { id: 3, name: "Anjali Singh", email: "anjali.s@example.com", phone: "9876543212", joined: "2025-08-15" },
+        { id: 4, name: "Sameer Khan", email: "sameer.k@example.com", phone: "9876543213", joined: "2025-08-12" },
+        { id: 5, name: "Aditi Joshi", email: "aditi.j@example.com", phone: "9876543214", joined: "2025-08-10" },
+    ];
+
+    let companies = [
+        { id: 101, name: "Tech Solutions Inc.", industry: "Technology", location: "Bengaluru", joined: "2025-07-01" },
+        { id: 102, name: "Innovate Co.", industry: "Fintech", location: "Mumbai", joined: "2025-07-05" },
+        { id: 103, name: "HealthFirst", industry: "Healthcare", location: "Delhi", joined: "2025-07-10" },
+        { id: 104, name: "MarketBridge", industry: "Marketing", location: "Pune", joined: "2025-07-15" }
+    ];
+
+    let jobs = [
+        { id: 201, title: "Senior Frontend Developer", company: "Tech Solutions Inc." },
+        { id: 202, title: "Project Manager", company: "Innovate Co." },
+        { id: 203, title: "Data Analyst", company: "MarketBridge" },
+        { id: 204, title: "Medical Researcher", company: "HealthFirst" }
+    ];
+
+    let applications = [
+        { seekerId: 1, jobId: 201, date: "2025-08-21" },
+        { seekerId: 2, jobId: 202, date: "2025-08-21" },
+        { seekerId: 3, jobId: 201, date: "2025-08-20" },
+        { seekerId: 4, jobId: 204, date: "2025-08-19" },
+        { seekerId: 5, jobId: 201, date: "2025-08-18" },
+        { seekerId: 1, jobId: 202, date: "2025-08-17" },
+    ];
+
+    const totalHired = 458;
+
+    // --- STATE MANAGEMENT ---
+    let currentEditId = null;
+
+    // --- UI ELEMENTS ---
+    const navLinks = document.querySelectorAll('.nav-link');
+    const views = document.querySelectorAll('.view');
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menu-toggle');
+    const overlay = document.getElementById('sidebar-overlay');
+    
+    const seekerSearch = document.getElementById('seeker-search');
+    const companySearch = document.getElementById('company-search');
+    const jobSearch = document.getElementById('job-search');
+
+    // --- MOBILE SIDEBAR LOGIC ---
+    menuToggle.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('active'); });
+    overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('active'); });
+
+    // --- VIEW & NAVIGATION LOGIC ---
+    function showView(viewId) {
+        views.forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        
+        const isFormActive = viewId.includes('-form-');
+        const isApplicantsView = viewId === 'applicants-view';
+
+        navLinks.forEach(l => {
+            const linkView = l.getAttribute('data-view');
+            let mainViewId = viewId.replace('-form-view', '-view');
+
+            const isActive = (linkView === mainViewId) || (isApplicantsView && linkView === 'jobs-view');
+            l.classList.toggle('active', isActive);
+        });
+
+        if (window.innerWidth <= 992) {
+             sidebar.classList.remove('open');
+             overlay.classList.remove('active');
+        }
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            showView(link.getAttribute('data-view'));
+        });
+    });
+
+    // --- FORM MANAGEMENT ---
+    function showSeekerForm(seekerId = null) {
+        document.getElementById('seeker-form').reset();
+        currentEditId = seekerId;
+        if (seekerId) {
+            const seeker = jobSeekers.find(s => s.id === seekerId);
+            document.getElementById('seeker-form-title').textContent = 'Edit Job Seeker';
+            document.getElementById('seeker-id-input').value = seeker.id;
+            document.getElementById('seeker-name').value = seeker.name;
+            document.getElementById('seeker-email').value = seeker.email;
+            document.getElementById('seeker-phone').value = seeker.phone;
+        } else {
+            document.getElementById('seeker-form-title').textContent = 'Add New Job Seeker';
+            document.getElementById('seeker-id-input').value = '';
+        }
+        showView('seeker-form-view');
+    }
+
+    function showCompanyForm(companyId = null) {
+        document.getElementById('company-form').reset();
+        currentEditId = companyId;
+        if (companyId) {
+            const company = companies.find(c => c.id === companyId);
+            document.getElementById('company-form-title').textContent = 'Edit Company';
+            document.getElementById('company-id-input').value = company.id;
+            document.getElementById('company-name').value = company.name;
+            document.getElementById('company-industry').value = company.industry;
+            document.getElementById('company-location').value = company.location;
+        } else {
+            document.getElementById('company-form-title').textContent = 'Add New Company';
+            document.getElementById('company-id-input').value = '';
+        }
+        showView('company-form-view');
+    }
+    
+    function showJobForm(jobId = null) {
+        document.getElementById('job-form').reset();
+        populateCompanyOptions();
+        currentEditId = jobId;
+        if (jobId) {
+            const job = jobs.find(j => j.id === jobId);
+            document.getElementById('job-form-title').textContent = 'Edit Job';
+            document.getElementById('job-id-input').value = job.id;
+            document.getElementById('job-title').value = job.title;
+            
+            setCustomSelectValue('job-company-select', job.company, document.getElementById('job-company-hidden'));
+        } else {
+            document.getElementById('job-form-title').textContent = 'Post New Job';
+            document.getElementById('job-id-input').value = '';
+            
+            setCustomSelectValue('job-company-select', '', document.getElementById('job-company-hidden'), 'Select a company...');
+        }
+        showView('job-form-view');
+    }
+
+    function showApplicantsView(jobId) {
+        const job = jobs.find(j => j.id === jobId);
+        if (!job) return;
+
+        const jobApplications = applications.filter(app => app.jobId === jobId);
+        const applicantsDetails = jobApplications.map(app => {
+            const seeker = jobSeekers.find(s => s.id === app.seekerId);
+            return { ...seeker, appliedOn: app.date };
+        });
+
+        document.getElementById('applicants-page-title').textContent = `Applicants for ${job.title}`;
+        document.getElementById('applicants-job-title').textContent = job.title;
+        document.getElementById('applicants-job-count').textContent = `${applicantsDetails.length} applicant(s) found.`;
+
+        const tableBody = document.getElementById('applicants-table-body');
+        if (applicantsDetails.length > 0) {
+            tableBody.innerHTML = applicantsDetails
+                .map(s => `<tr>
+                    <td>${s.name}</td>
+                    <td>${s.email}</td>
+                    <td>${s.phone}</td>
+                    <td>${s.appliedOn}</td>
+                </tr>`)
+                .join('');
+        } else {
+            tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px;">No applicants found for this job.</td></tr>`;
+        }
+        showView('applicants-view');
+    }
+    
+    function populateCompanyOptions() {
+        const optionsContainer = document.querySelector('#job-company-select .custom-select__options');
+        optionsContainer.innerHTML = companies.map(c => `<li class="custom-select__option" data-value="${c.name}">${c.name}</li>`).join('');
+    }
+
+    // --- CUSTOM SELECT LOGIC ---
+    function setupCustomSelect(selectId, hiddenInput, callback) {
+        const selectElement = document.getElementById(selectId);
+        if (!selectElement) return;
+        const trigger = selectElement.querySelector('.custom-select__trigger');
+        const optionsList = selectElement.querySelector('.custom-select__options');
+
+        trigger.addEventListener('click', () => selectElement.classList.toggle('open'));
+        
+        optionsList.addEventListener('click', (e) => {
+            if(e.target.classList.contains('custom-select__option')) {
+                const option = e.target;
+                const selectedValue = option.dataset.value;
+                setCustomSelectValue(selectId, selectedValue, hiddenInput);
+                selectElement.classList.remove('open');
+                if(callback) callback(selectedValue);
+            }
+        });
+
+        window.addEventListener('click', (e) => {
+            if (!selectElement.contains(e.target)) selectElement.classList.remove('open');
+        });
+    }
+
+    function setCustomSelectValue(selectId, value, hiddenInput, placeholder = '') {
+        const selectElement = document.getElementById(selectId);
+        if (!selectElement) return;
+        const triggerText = selectElement.querySelector('.custom-select__trigger span');
+        const options = selectElement.querySelectorAll('.custom-select__option');
+        let valueSet = false;
+
+        hiddenInput.value = value;
+        
+        options.forEach(option => {
+            option.classList.remove('selected');
+            if (option.dataset.value === value) {
+                option.classList.add('selected');
+                triggerText.textContent = option.textContent;
+                valueSet = true;
+            }
+        });
+
+        if (!valueSet) {
+             triggerText.textContent = placeholder || (options[0] ? options[0].textContent : '');
+             if (!placeholder) {
+                 if (options[0]) options[0].classList.add('selected');
+                 hiddenInput.value = options[0] ? options[0].dataset.value : '';
+             }
+        }
+    }
+
+    // --- SEARCH / FILTER LOGIC ---
+    seekerSearch.addEventListener('input', () => renderTables());
+    companySearch.addEventListener('input', () => renderTables());
+    jobSearch.addEventListener('input', () => renderTables());
+
+    // --- RENDER FUNCTIONS ---
+    function renderDashboardStats() {
+        document.getElementById('total-seekers').textContent = jobSeekers.length.toLocaleString();
+        document.getElementById('total-companies').textContent = companies.length.toLocaleString();
+        document.getElementById('total-jobs').textContent = jobs.length.toLocaleString();
+        document.getElementById('total-hired').textContent = totalHired.toLocaleString();
+    }
+
+    function renderTables() {
+        // Filtered tables
+        const seekerQuery = seekerSearch.value.toLowerCase();
+        document.getElementById('seekers-table-body').innerHTML = jobSeekers
+            .filter(s => s.name.toLowerCase().includes(seekerQuery) || s.email.toLowerCase().includes(seekerQuery))
+            .map(s => `<tr>
+                <td>${s.name}</td>
+                <td>${s.email}</td>
+                <td>${s.phone}</td>
+                <td>${s.joined}</td>
+                <td class="action-buttons">
+                    <button title="Edit" class="edit-btn" data-type="seeker" data-id="${s.id}"><i class="fas fa-edit"></i></button>
+                    <button title="Delete" class="delete-seeker-btn" data-id="${s.id}"><i class="fas fa-trash-alt"></i></button>
+                </td>
+            </tr>`).join('');
+
+        const companyQuery = companySearch.value.toLowerCase();
+        document.getElementById('companies-table-body').innerHTML = companies
+            .filter(c => c.name.toLowerCase().includes(companyQuery) || c.industry.toLowerCase().includes(companyQuery))
+            .map(c => `<tr>
+                <td>${c.name}</td>
+                <td>${c.industry}</td>
+                <td>${c.location}</td>
+                <td>${c.joined}</td>
+                <td class="action-buttons">
+                    <button title="Edit" class="edit-btn" data-type="company" data-id="${c.id}"><i class="fas fa-edit"></i></button>
+                    <button title="Delete" class="delete-company-btn" data-id="${c.id}"><i class="fas fa-trash-alt"></i></button>
+                </td>
+            </tr>`).join('');
+        
+        const jobQuery = jobSearch.value.toLowerCase();
+        document.getElementById('jobs-table-body').innerHTML = jobs
+            .filter(j => j.title.toLowerCase().includes(jobQuery) || j.company.toLowerCase().includes(jobQuery))
+            .map(j => {
+                const applicantCount = applications.filter(app => app.jobId === j.id).length;
+                return `<tr>
+                    <td>${j.title}</td>
+                    <td>${j.company}</td>
+                    <td>${applicantCount}</td>
+                    <td class="action-buttons">
+                        <button title="View Applicants" class="view-applicants-btn" data-id="${j.id}"><i class="fas fa-users"></i></button>
+                        <button title="Edit" class="edit-btn" data-type="job" data-id="${j.id}"><i class="fas fa-edit"></i></button>
+                        <button title="Delete" class="delete-job-btn" data-id="${j.id}"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+    }
+
+    // --- CHART.JS INITIALIZATION ---
+    function initializeCharts() {
+        const growthCtx = document.getElementById('growthChart').getContext('2d');
+        new Chart(growthCtx, { type: 'line', data: { labels: ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'], datasets: [{ label: 'New Job Seekers', data: [120, 190, 300, 500, 290, 400], borderColor: 'var(--success-color)', backgroundColor: 'rgba(46, 204, 113, 0.1)', fill: true, tension: 0.3 }, { label: 'New Companies', data: [20, 35, 40, 60, 55, 70], borderColor: 'var(--danger-color)', backgroundColor: 'rgba(231, 76, 60, 0.1)', fill: true, tension: 0.3 }] }, options: { responsive: true, scales: { y: { beginAtZero: true } } } });
+    }
+
+    // --- GLOBAL UPDATE FUNCTION ---
+    function updateAllUI() {
+        renderDashboardStats();
+        renderTables();
+    }
+    
+    // --- EVENT LISTENERS ---
+    document.getElementById('add-seeker-btn').addEventListener('click', () => showSeekerForm());
+    document.getElementById('add-company-btn').addEventListener('click', () => showCompanyForm());
+    document.getElementById('add-job-btn').addEventListener('click', () => showJobForm());
+    document.getElementById('back-to-jobs-btn').addEventListener('click', () => showView('jobs-view'));
+
+    document.getElementById('cancel-seeker-form').addEventListener('click', () => showView('seekers-view'));
+    document.getElementById('cancel-company-form').addEventListener('click', () => showView('companies-view'));
+    document.getElementById('cancel-job-form').addEventListener('click', () => showView('jobs-view'));
+
+    // Form Submissions
+    document.getElementById('seeker-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const id = document.getElementById('seeker-id-input').value;
+        const seekerData = { name: document.getElementById('seeker-name').value, email: document.getElementById('seeker-email').value, phone: document.getElementById('seeker-phone').value };
+        if (id) {
+            const index = jobSeekers.findIndex(s => s.id == id);
+            jobSeekers[index] = { ...jobSeekers[index], ...seekerData };
+        } else {
+            jobSeekers.unshift({ id: Date.now(), ...seekerData, joined: new Date().toISOString().slice(0, 10) });
+        }
+        updateAllUI();
+        showView('seekers-view');
+    });
+
+    document.getElementById('company-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const id = document.getElementById('company-id-input').value;
+        const companyData = { name: document.getElementById('company-name').value, industry: document.getElementById('company-industry').value, location: document.getElementById('company-location').value };
+        if (id) {
+            const index = companies.findIndex(c => c.id == id);
+            companies[index] = { ...companies[index], ...companyData };
+        } else {
+            companies.unshift({ id: Date.now(), ...companyData, joined: new Date().toISOString().slice(0, 10) });
+        }
+        updateAllUI();
+        showView('companies-view');
+    });
+
+    document.getElementById('job-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const id = document.getElementById('job-id-input').value;
+        const jobData = { 
+            title: document.getElementById('job-title').value, 
+            company: document.getElementById('job-company-hidden').value
+        };
+        if (id) {
+            const index = jobs.findIndex(j => j.id == id);
+            jobs[index] = { ...jobs[index], ...jobData };
+        } else {
+            jobs.unshift({ id: Date.now(), ...jobData });
+        }
+        updateAllUI();
+        showView('jobs-view');
+    });
+
+    document.body.addEventListener('click', function(e) {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+
+        // Edit buttons
+        if (btn.classList.contains('edit-btn')) {
+            const type = btn.dataset.type;
+            const id = parseInt(btn.dataset.id, 10);
+            if (type === 'seeker') showSeekerForm(id);
+            else if (type === 'company') showCompanyForm(id);
+            else if (type === 'job') showJobForm(id);
+        }
+
+        // View applicants button
+        if (btn.classList.contains('view-applicants-btn')) {
+            const id = parseInt(btn.dataset.id, 10);
+            showApplicantsView(id);
+        }
+        
+        // Delete job button
+        if (btn.classList.contains('delete-job-btn')) {
+            const id = parseInt(btn.dataset.id, 10);
+            const jobToDelete = jobs.find(j => j.id === id);
+            if (confirm(`Are you sure you want to delete the job "${jobToDelete.title}"? This will also remove all associated applicants.`)) {
+                jobs = jobs.filter(j => j.id !== id);
+                applications = applications.filter(app => app.jobId !== id);
+                updateAllUI();
+            }
+        }
+
+        // Delete seeker button
+        if (btn.classList.contains('delete-seeker-btn')) {
+            const id = parseInt(btn.dataset.id, 10);
+            const seekerToDelete = jobSeekers.find(s => s.id === id);
+            if (confirm(`Are you sure you want to delete the job seeker "${seekerToDelete.name}"? This will remove all their applications.`)) {
+                jobSeekers = jobSeekers.filter(s => s.id !== id);
+                applications = applications.filter(app => app.seekerId !== id);
+                updateAllUI();
+            }
+        }
+
+        // Delete company button
+        if (btn.classList.contains('delete-company-btn')) {
+            const id = parseInt(btn.dataset.id, 10);
+            const companyToDelete = companies.find(c => c.id === id);
+            if (confirm(`Are you sure you want to delete the company "${companyToDelete.name}"? This will remove all associated jobs and their applications.`)) {
+                const jobsFromCompany = jobs.filter(j => j.company === companyToDelete.name);
+                const jobIdsFromCompany = jobsFromCompany.map(j => j.id);
+                
+                applications = applications.filter(app => !jobIdsFromCompany.includes(app.jobId));
+                jobs = jobs.filter(j => j.company !== companyToDelete.name);
+                companies = companies.filter(c => c.id !== id);
+                updateAllUI();
+            }
+        }
+    });
+
+    // --- INITIAL LOAD ---
+    updateAllUI();
+    initializeCharts();
+    setupCustomSelect('job-company-select', document.getElementById('job-company-hidden'));
+});
+</script>
+</body>
+</html>

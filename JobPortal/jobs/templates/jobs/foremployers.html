@@ -1,0 +1,215 @@
+{% extends 'jobs/base.html' %}
+{% load static %}
+
+{% block title %}Employer Dashboard - Job Application Portal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'jobs/css/foremployers.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="dashboard-container">
+        <!-- NEW: Sidebar Toggle Button and Overlay -->
+        <button class="sidebar-toggle-btn" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+        <div class="dashboard-overlay" id="dashboard-overlay"></div>
+
+        <div class="dashboard-wrapper">
+            <nav class="dashboard-sidebar" id="dashboard-sidebar">
+                <div class="sidebar-nav">
+                    <ul>
+                        <li><a href="#" class="nav-link active" data-view="dashboard-view"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                        <li><a href="#" class="nav-link" data-view="jobs-view"><i class="fas fa-briefcase"></i> Manage Jobs</a></li>
+                        <li><a href="#" class="nav-link" data-view="all-applicants-view"><i class="fas fa-file-alt"></i> All Applicants</a></li>
+                        <li><a href="#" class="nav-link" data-view="selected-view"><i class="fas fa-user-check"></i> Selected Applicants</a></li>
+                        <li><a href="#" class="nav-link" data-view="rejected-view"><i class="fas fa-user-times"></i> Rejected Applicants</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="dashboard-main-content">
+                <!-- VIEW 1: Main Dashboard -->
+                <div id="dashboard-view" class="view active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-title"><span>Active Jobs</span><i class="fas fa-briefcase stat-icon"></i></div>
+                            <div class="stat-value" id="stat-active-jobs">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title"><span>Total Applicants</span><i class="fas fa-users stat-icon"></i></div>
+                            <div class="stat-value" id="stat-total-applicants">0</div>
+                        </div>
+                         <div class="stat-card">
+                            <div class="stat-title"><span>Pending Review</span><i class="fas fa-file-signature stat-icon"></i></div>
+                            <div class="stat-value" id="stat-pending-review">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title"><span>Selected</span><i class="fas fa-user-check stat-icon"></i></div>
+                            <div class="stat-value" id="stat-selected">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title"><span>Rejected</span><i class="fas fa-user-times stat-icon"></i></div>
+                            <div class="stat-value" id="stat-rejected">0</div>
+                        </div>
+                         <div class="stat-card">
+                            <div class="stat-title"><span>Hired</span><i class="fas fa-award stat-icon"></i></div>
+                            <div class="stat-value" id="stat-hired">0</div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Application Analytics</h2>
+                            <span style="color: var(--text-light-color);">Last 365 Days</span>
+                        </div>
+                        <div>
+                            <canvas id="applicationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 2: Manage Jobs List -->
+                <div id="jobs-view" class="view">
+                     <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Manage Job Listings</h2>
+                            <button class="btn" id="post-job-btn"><i class="fas fa-plus-circle"></i> Post Job</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="jobs-table-body">
+                                <!-- Populated by JS -->
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 3: Applicants for a Specific Job -->
+                <div id="applicants-view" class="view">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <div>
+                               <h2 class="panel-title" id="applicants-job-title">Applicants</h2>
+                               <p id="applicants-job-count" style="color: var(--text-light-color);"></p>
+                            </div>
+                            <button class="btn btn-outline" id="back-to-jobs-btn"><i class="fas fa-arrow-left"></i> Back to Jobs</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="applicants-table-body">
+                                <!-- Populated by JS -->
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- VIEW 4: All Applicants List -->
+                <div id="all-applicants-view" class="view">
+                     <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">All Applicants</h2>
+                            <div class="custom-select-wrapper">
+                                <div class="custom-select" id="all-applicants-filter">
+                                    <div class="custom-select__trigger"><span>All Statuses</span></div>
+                                    <ul class="custom-select__options">
+                                        <li class="custom-select__option selected" data-value="All">All Statuses</li>
+                                        <li class="custom-select__option" data-value="Applied">Applied</li>
+                                        <li class="custom-select__option" data-value="Shortlisted">Shortlisted</li>
+                                        <li class="custom-select__option" data-value="Hired">Hired</li>
+                                        <li class="custom-select__option" data-value="Rejected">Rejected</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="all-applicants-table-body">
+                                <!-- Populated by JS -->
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 5: Selected Applicants -->
+                <div id="selected-view" class="view">
+                     <div class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <h2 class="panel-title">Selected Applicants</h2>
+                                <p style="color: var(--text-light-color);">Candidates shortlisted or hired in the last 365 days.</p>
+                            </div>
+                            <div class="custom-select-wrapper">
+                                <div class="custom-select" id="selected-applicants-filter">
+                                    <div class="custom-select__trigger"><span>All Selected</span></div>
+                                    <ul class="custom-select__options">
+                                        <li class="custom-select__option selected" data-value="All">All Selected</li>
+                                        <li class="custom-select__option" data-value="Shortlisted">Shortlisted</li>
+                                        <li class="custom-select__option" data-value="Hired">Hired</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="selected-applicants-table-body">
+                                <!-- Populated by JS -->
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 6: Rejected Applicants -->
+                <div id="rejected-view" class="view">
+                     <div class="panel">
+                         <div class="panel-header">
+                            <div>
+                                <h2 class="panel-title">Rejected Applicants</h2>
+                                <p style="color: var(--text-light-color);">Candidates rejected in the last 365 days.</p>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="rejected-applicants-table-body">
+                                <!-- Populated by JS -->
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 7: Post/Edit Job Form -->
+                <div id="job-form-view" class="view">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title" id="job-form-title">Post a New Job</h2>
+                        </div>
+                        <form id="job-form" class="job-form">
+                            <input type="hidden" id="job-id-input">
+                            <div class="form-group">
+                                <label for="job-title">Job Title</label>
+                                <input type="text" id="job-title" class="form-control" required>
+                            </div>
+                             <div class="form-group">
+                                <label for="job-status">Status</label>
+                                <input type="hidden" id="job-status" value="Active">
+                                <div class="custom-select-wrapper">
+                                    <div class="custom-select" id="job-status-select">
+                                        <div class="custom-select__trigger"><span>Active</span></div>
+                                        <ul class="custom-select__options">
+                                            <li class="custom-select__option selected" data-value="Active">Active</li>
+                                            <li class="custom-select__option" data-value="Closed">Closed</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-outline" id="cancel-job-form">Cancel</button>
+                                <button type="submit" class="btn">Save Job</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'jobs/js/employer_dashboard.js' %}"></script>
+{% endblock %}

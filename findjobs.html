@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Jobs - Job Application Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --light-color: #f8f9f9;
+            --white-color: #ffffff;
+            --text-color: #34495e;
+            --text-light-color: #7f8c8d;
+            --border-color: #e0e0e0;
+            --tag-bg-color: #ecf0f1;
+            --box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background-color: var(--light-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .main-header {
+            background: var(--white-color);
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .main-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .main-nav ul {
+            display: flex;
+            align-items: center;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .main-nav ul li { margin-left: 25px; }
+        .main-nav ul li a {
+            font-weight: 500;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .main-nav ul li a:hover { color: var(--secondary-color); }
+
+        .jobs-page-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            padding: 40px 0;
+            align-items: flex-start;
+        }
+
+        .filters-sidebar {
+            background-color: var(--white-color);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+            position: sticky;
+            top: 100px;
+        }
+
+        .filter-group { margin-bottom: 25px; }
+        .filter-group:last-child { margin-bottom: 0; }
+        .filter-group h3 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .filter-group input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+        }
+        .filter-group .checkbox-group label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .salary-range-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #salary-value {
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+        .filter-group input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+        .reset-filters-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            background-color: var(--tag-bg-color);
+            color: var(--text-color);
+        }
+        .reset-filters-btn:hover { background-color: #ddd; }
+        /* Remove margin-top from the button if it's inside filter-actions */
+        .filter-actions .reset-filters-btn {
+            margin-top: 0;
+        }
+
+
+        .job-listings-section { min-width: 0; }
+        
+        .listings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--white-color);
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+        }
+        .listings-header .results-count { font-weight: 600; }
+        
+        .sort-by { display: flex; align-items: center; gap: 8px; }
+        .custom-select-wrapper { position: relative; width: 100%; }
+        .custom-select { font-size: 0.95rem; }
+        .custom-select__trigger {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            background: var(--white-color);
+            transition: border-color 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .custom-select__trigger:after {
+            content: '\f078';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+        .custom-select.open .custom-select__trigger { border-color: var(--secondary-color); }
+        .custom-select.open .custom-select__trigger:after { transform: rotate(180deg); }
+        .custom-select__options {
+            position: absolute;
+            top: 110%;
+            left: 0;
+            right: 0;
+            background: var(--white-color);
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 10;
+            list-style: none;
+            padding: 5px 0;
+            margin: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
+        }
+        .custom-select.open .custom-select__options {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .custom-select__option {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .custom-select__option:hover, .custom-select__option.selected {
+            background-color: var(--light-color);
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+        .filter-group .custom-select-wrapper .custom-select__trigger {
+             padding: 10px;
+        }
+        #sort-options, #experience-level { display: none; }
+
+        .job-card {
+            background: var(--white-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.3s, transform 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(44, 62, 80, 0.1);
+        }
+        .job-card-header { display: flex; align-items: flex-start; margin-bottom: 15px; }
+        .job-card-header .logo {
+            width: 50px; height: 50px; border-radius: 8px; margin-right: 15px;
+            flex-shrink: 0; object-fit: contain; border: 1px solid var(--border-color);
+        }
+        .job-card-header .info { flex-grow: 1; }
+        .job-card-header .info h3 { font-size: 1.2rem; margin: 0 0 5px 0; }
+        .job-card-header .info .company { color: var(--text-light-color); font-weight: 500; }
+        .job-card .details { display: flex; flex-wrap: wrap; gap: 15px; color: var(--text-light-color); margin-bottom: 20px; font-size: 0.9rem; }
+        .job-card .details span { display: flex; align-items: center; }
+        .job-card .details i { margin-right: 8px; }
+        .job-card .tags { margin-bottom: 20px; }
+        .job-card .tags .tag {
+            display: inline-block; background-color: var(--tag-bg-color); color: var(--text-light-color);
+            padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; margin-right: 8px; margin-bottom: 8px;
+        }
+        .job-card-footer {
+            margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .job-card-footer .posted-date { font-size: 0.9rem; color: var(--text-light-color); }
+        .job-card-footer .btn-apply {
+            background-color: var(--secondary-color); color: var(--white-color); padding: 10px 20px;
+            border-radius: 5px; font-weight: 500; text-decoration: none; transition: background-color 0.3s;
+        }
+        .job-card-footer .btn-apply:hover { background-color: var(--primary-color); }
+        
+        .pagination { display: flex; justify-content: center; align-items: center; margin-top: 30px; flex-wrap: wrap; }
+        .pagination button {
+            color: var(--primary-color); padding: 10px 15px; border-radius: 5px;
+            margin: 2px 5px; transition: background-color 0.3s, color 0.3s; border: 1px solid var(--border-color);
+            background: var(--white-color); cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 1rem;
+        }
+        .pagination button.active, .pagination button:hover {
+            background-color: var(--secondary-color); color: var(--white-color); border-color: var(--secondary-color);
+        }
+
+        .mobile-menu-toggle, .backdrop, .mobile-filter-header { display: none; }
+        
+        @media(max-width: 992px) {
+            .jobs-page-layout { grid-template-columns: 1fr; }
+            
+            .filters-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 300px;
+                height: 100%;
+                z-index: 1020;
+                border-radius: 0; 
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                /* --- MODIFICATION START --- */
+                padding: 0; /* Remove padding from the main container */
+                display: flex; /* Use flexbox to structure the sidebar */
+                flex-direction: column;
+                /* --- MODIFICATION END --- */
+            }
+            .filters-sidebar.open {
+                transform: translateX(0);
+            }
+
+            /* --- NEW: Scrollable area for filters --- */
+            .filter-scroll-area {
+                flex-grow: 1; /* Allow this area to fill available space */
+                overflow-y: auto; /* Make only this part scrollable */
+                padding: 25px; /* Add padding here instead */
+            }
+
+            /* --- NEW: Sticky footer for the reset button --- */
+            .filter-actions {
+                padding: 15px 25px;
+                border-top: 1px solid var(--border-color);
+                background-color: var(--white-color);
+            }
+            
+            .listings-header { display: none; }
+            .mobile-filter-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                background-color: var(--white-color);
+                padding: 15px 25px;
+                border-radius: 12px;
+                box-shadow: var(--box-shadow);
+            }
+            #mobile-filter-btn {
+                background: var(--secondary-color);
+                color: var(--white-color);
+                border: none;
+                padding: 10px 15px;
+                border-radius: 5px;
+                font-size: 0.95rem;
+                font-weight: 500;
+                cursor: pointer;
+            }
+            #mobile-filter-btn i { margin-right: 8px; }
+            #mobile-results-count { font-weight: 600; }
+            
+            .backdrop {
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 1010;
+                display: none;
+            }
+            .backdrop.active { display: block; }
+        }
+
+        @media(max-width: 768px) {
+            .main-nav {
+                display: none; width: 100%; background: var(--white-color);
+                position: absolute; top: 100%; left: 0;
+                box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            }
+            .main-nav.active { display: block; }
+            .main-nav ul { flex-direction: column; }
+            .main-nav ul li { margin: 0; width: 100%; text-align: center; }
+            .main-nav ul li a { display: block; padding: 15px; border-bottom: 1px solid #f4f4f4; }
+            
+            .mobile-menu-toggle {
+                display: block; cursor: pointer;
+                font-size: 1.8rem; color: var(--primary-color);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container">
+            <a href="#" class="logo">JobPortal</a>
+            <nav class="main-nav" id="main-nav">
+                <ul>
+                    <li><a href="#">Find Jobs</a></li>
+                    <li><a href="#">Companies</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">For Employers</a></li>
+                    <li><a href="#" class="nav-btn">Login</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu-toggle" id="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <main class="container jobs-page-layout">
+        <aside class="filters-sidebar" id="filters-sidebar">
+            <!-- New wrapper for scrollable content -->
+            <div class="filter-scroll-area">
+                <div class="filter-group">
+                    <h3>Search</h3>
+                    <input type="text" id="keywords" placeholder="Keywords, Title, Company">
+                </div>
+                <div class="filter-group">
+                    <h3>Location</h3>
+                    <input type="text" id="location" placeholder="City, State, or Zip Code">
+                </div>
+                <div class="filter-group">
+                    <h3>Job Type</h3>
+                    <div class="checkbox-group" id="job-type">
+                        <label><input type="checkbox" name="job_type" value="Full-time"> Full-time</label>
+                        <label><input type="checkbox" name="job_type" value="Part-time"> Part-time</label>
+                        <label><input type="checkbox" name="job_type" value="Contract"> Contract</label>
+                        <label><input type="checkbox" name="job_type" value="Internship"> Internship</label>
+                        <label><input type="checkbox" name="job_type" value="Remote"> Remote</label>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <h3>Experience Level</h3>
+                    <div class="custom-select-wrapper">
+                        <select id="experience-level">
+                            <option value="">Any Experience</option>
+                            <option value="Entry Level">Entry Level</option>
+                            <option value="Mid Level">Mid Level</option>
+                            <option value="Senior Level">Senior Level</option>
+                            <option value="Director">Director</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label for="salary-range" class="salary-range-label">
+                        <h3>Salary Min</h3>
+                        <span id="salary-value">$0k</span>
+                    </label>
+                    <input type="range" id="salary-range" min="0" max="250" value="0">
+                </div>
+                <div class="filter-group">
+                    <h3>Industry</h3>
+                    <div class="checkbox-group" id="industry-type">
+                        <label><input type="checkbox" name="industry_type" value="Tech"> Technology</label>
+                        <label><input type="checkbox" name="industry_type" value="Health"> Healthcare</label>
+                        <label><input type="checkbox" name="industry_type" value="Finance"> Finance</label>
+                        <label><input type="checkbox" name="industry_type" value="Education"> Education</label>
+                        <label><input type="checkbox" name="industry_type" value="Retail"> Retail</label>
+                    </div>
+                </div>
+                 <div class="filter-group">
+                    <h3>Company Size</h3>
+                    <div class="checkbox-group" id="company-size">
+                        <label><input type="checkbox" name="company_size" value="1-50"> 1-50 Employees</label>
+                        <label><input type="checkbox" name="company_size" value="51-200"> 51-200 Employees</label>
+                        <label><input type="checkbox" name="company_size" value="201-1000"> 201-1000 Employees</label>
+                        <label><input type="checkbox" name="company_size" value="1001+"> 1001+ Employees</label>
+                    </div>
+                </div>
+            </div>
+            <!-- New wrapper for the button -->
+            <div class="filter-actions">
+                <button class="reset-filters-btn" id="reset-filters">Reset Filters</button>
+            </div>
+        </aside>
+
+        <section class="job-listings-section">
+            <div class="mobile-filter-header">
+                 <button id="mobile-filter-btn"><i class="fas fa-filter"></i> Filters</button>
+                 <span class="results-count" id="mobile-results-count"></span>
+            </div>
+
+            <div class="listings-header">
+                <span class="results-count" id="results-count-display"></span>
+                <div class="sort-by">
+                    <label for="sort-options">Sort by:</label>
+                    <div class="custom-select-wrapper">
+                        <select id="sort-options">
+                            <option value="relevance">Relevance</option>
+                            <option value="date">Date</option>
+                            <option value="salary">Salary</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="job-card-container" id="job-listings"></div>
+            <div class="pagination" id="pagination"></div>
+        </section>
+    </main>
+
+    <div class="backdrop" id="backdrop"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+               const jobsData = [
+                { id: 1, title: 'Software Engineer, Backend', company: 'Google', logo: 'https://logo.clearbit.com/google.com', location: 'Mountain View, CA', tags: ['Go', 'Distributed Systems'], jobType: 'Full-time', category: 'Engineering', salary: 180000, postedAgo: '1 day ago', postedTimestamp: new Date().setDate(new Date().getDate() - 1) },
+                { id: 2, title: 'Cloud Solutions Architect', company: 'Microsoft', logo: 'https://logo.clearbit.com/microsoft.com', location: 'Redmond, WA', tags: ['Azure', 'Cloud'], jobType: 'Full-time', category: 'Engineering', salary: 165000, postedAgo: '2 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 2) },
+                { id: 3, title: 'iOS Developer', company: 'Apple', logo: 'https://logo.clearbit.com/apple.com', location: 'Cupertino, CA', tags: ['Swift', 'iOS'], jobType: 'Full-time', category: 'Engineering', salary: 175000, postedAgo: '4 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 4) },
+                { id: 4, title: 'DevOps Engineer', company: 'Amazon', logo: 'https://logo.clearbit.com/amazon.com', location: 'Seattle, WA', tags: ['AWS', 'CI/CD'], jobType: 'Full-time', category: 'Engineering', salary: 155000, postedAgo: '5 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 5) },
+                { id: 5, title: 'Senior Data Engineer', company: 'Netflix', logo: 'https://logo.clearbit.com/netflix.com', location: 'Los Gatos, CA', tags: ['Spark', 'ETL'], jobType: 'Full-time', category: 'Engineering', salary: 195000, postedAgo: '1 week ago', postedTimestamp: new Date().setDate(new Date().getDate() - 7) },
+                { id: 6, title: 'Frontend Developer', company: 'Stripe', logo: 'https://logo.clearbit.com/stripe.com', location: 'New York, NY', tags: ['React', 'JavaScript'], jobType: 'Full-time', category: 'Engineering', salary: 160000, postedAgo: '2 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 2) },
+                { id: 7, title: 'UX/UI Designer', company: 'Figma', logo: 'https://logo.clearbit.com/figma.com', location: 'San Francisco, CA', tags: ['Remote Option', 'Figma'], jobType: 'Full-time', category: 'Design', salary: 140000, postedAgo: '5 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 5) },
+                { id: 8, title: 'Project Manager', company: 'Atlassian', logo: 'https://logo.clearbit.com/atlassian.com', location: 'Chicago, IL', tags: ['Agile', 'Jira'], jobType: 'Full-time', category: 'Engineering', salary: 130000, postedAgo: '1 week ago', postedTimestamp: new Date().setDate(new Date().getDate() - 7) },
+                { id: 9, title: 'Data Scientist', company: 'Spotify', logo: 'https://logo.clearbit.com/spotify.com', location: 'Boston, MA', tags: ['Python', 'Machine Learning'], jobType: 'Full-time', category: 'Engineering', salary: 170000, postedAgo: '3 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 3) },
+                { id: 10, title: 'Backend Engineer', company: 'Twilio', logo: 'https://logo.clearbit.com/twilio.com', location: 'Remote', tags: ['Node.js', 'AWS'], jobType: 'Remote', category: 'Engineering', salary: 150000, postedAgo: '8 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 8) },
+                { id: 11, title: 'HR Manager', company: 'HubSpot', logo: 'https://logo.clearbit.com/hubspot.com', location: 'Austin, TX', tags: ['Recruiting', 'Onboarding'], jobType: 'Full-time', category: 'Human Resources', salary: 95000, postedAgo: '10 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 10) },
+                { id: 12, title: 'Product Manager', company: 'Salesforce', logo: 'https://logo.clearbit.com/salesforce.com', location: 'San Francisco, CA', tags: ['SaaS', 'Product Strategy'], jobType: 'Full-time', category: 'Engineering', salary: 185000, postedAgo: '1 day ago', postedTimestamp: new Date().setDate(new Date().getDate() - 1) },
+                { id: 13, title: 'Digital Marketing Specialist', company: 'Adobe', logo: 'https://logo.clearbit.com/adobe.com', location: 'New York, NY', tags: ['SEO', 'SEM'], jobType: 'Full-time', category: 'Marketing', salary: 85000, postedAgo: '3 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 3) },
+                { id: 14, title: 'Operations Manager', company: 'Uber', logo: 'https://logo.clearbit.com/uber.com', location: 'Chicago, IL', tags: ['Logistics', 'Strategy'], jobType: 'Full-time', category: 'Sales', salary: 110000, postedAgo: '6 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 6) },
+                { id: 15, title: 'Content Strategist', company: 'Airbnb', logo: 'https://logo.clearbit.com/airbnb.com', location: 'Remote', tags: ['Content Marketing', 'Writing'], jobType: 'Contract', category: 'Marketing', salary: 90000, postedAgo: '1 week ago', postedTimestamp: new Date().setDate(new Date().getDate() - 7) },
+                { id: 16, title: 'Security Engineer', company: 'Slack', logo: 'https://logo.clearbit.com/slack.com', location: 'Denver, CO', tags: ['Cybersecurity', 'InfoSec'], jobType: 'Full-time', category: 'Engineering', salary: 160000, postedAgo: '2 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 2) },
+                { id: 17, title: 'QA Automation Engineer', company: 'Dropbox', logo: 'https://logo.clearbit.com/dropbox.com', location: 'Austin, TX', tags: ['Selenium', 'Testing'], jobType: 'Full-time', category: 'Engineering', salary: 125000, postedAgo: '4 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 4) },
+                { id: 18, title: 'Machine Learning Engineer', company: 'LinkedIn', logo: 'https://logo.clearbit.com/linkedin.com', location: 'Sunnyvale, CA', tags: ['AI', 'NLP'], jobType: 'Full-time', category: 'Engineering', salary: 190000, postedAgo: '5 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 5) },
+                { id: 19, title: 'Hardware Engineer', company: 'Intel', logo: 'https://logo.clearbit.com/intel.com', location: 'Hillsboro, OR', tags: ['VLSI', 'Semiconductors'], jobType: 'Full-time', category: 'Engineering', salary: 145000, postedAgo: '1 week ago', postedTimestamp: new Date().setDate(new Date().getDate() - 7) },
+                { id: 20, title: 'Database Administrator', company: 'Oracle', logo: 'https://logo.clearbit.com/oracle.com', location: 'Reston, VA', tags: ['SQL', 'Database Management'], jobType: 'Full-time', category: 'Engineering', salary: 120000, postedAgo: '2 weeks ago', postedTimestamp: new Date().setDate(new Date().getDate() - 14) },
+                { id: 21, title: 'Network Engineer', company: 'Cisco', logo: 'https://logo.clearbit.com/cisco.com', location: 'San Jose, CA', tags: ['Networking', 'CCNA'], jobType: 'Full-time', category: 'Engineering', salary: 135000, postedAgo: '3 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 3) },
+                { id: 22, title: 'Blockchain Developer', company: 'IBM', logo: 'https://logo.clearbit.com/ibm.com', location: 'Armonk, NY', tags: ['Blockchain', 'Hyperledger'], jobType: 'Full-time', category: 'Engineering', salary: 155000, postedAgo: '1 week ago', postedTimestamp: new Date().setDate(new Date().getDate() - 7) },
+                { id: 23, title: 'Ruby on Rails Developer', company: 'Shopify', logo: 'https://logo.clearbit.com/shopify.com', location: 'Remote', tags: ['Ruby', 'Rails'], jobType: 'Remote', category: 'Engineering', salary: 165000, postedAgo: '2 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 2) },
+                { id: 24, title: 'Mobile Engineer (Android)', company: 'Square', logo: 'https://logo.clearbit.com/square.com', location: 'Atlanta, GA', tags: ['Kotlin', 'Android'], jobType: 'Full-time', category: 'Engineering', salary: 158000, postedAgo: '5 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 5) },
+                { id: 25, title: 'Content Moderator', company: 'Twitter', logo: 'https://logo.clearbit.com/twitter.com', location: 'Dublin, Ireland', tags: ['Social Media', 'Policy'], jobType: 'Contract', category: 'Customer Service', salary: 55000, postedAgo: '1 week ago', postedTimestamp: new Date().setDate(new Date().getDate() - 7) },
+                { id: 26, title: 'Visual Designer', company: 'Pinterest', logo: 'https://logo.clearbit.com/pinterest.com', location: 'San Francisco, CA', tags: ['Graphic Design', 'UI'], jobType: 'Full-time', category: 'Design', salary: 115000, postedAgo: '2 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 2) },
+                { id: 27, title: 'Data Analyst', company: 'Lyft', logo: 'https://logo.clearbit.com/lyft.com', location: 'New York, NY', tags: ['SQL', 'Tableau'], jobType: 'Full-time', category: 'Engineering', salary: 105000, postedAgo: '4 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 4) },
+                { id: 28, title: 'AR Engineer', company: 'Snap', logo: 'https://logo.clearbit.com/snap.com', location: 'Los Angeles, CA', tags: ['AR/VR', 'Computer Vision'], jobType: 'Full-time', category: 'Engineering', salary: 175000, postedAgo: '6 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 6) },
+                { id: 29, title: 'Customer Support Representative', company: 'Zoom', logo: 'https://logo.clearbit.com/zoom.us', location: 'Remote', tags: ['Communication'], jobType: 'Part-time', category: 'Customer Service', salary: 48000, postedAgo: '1 day ago', postedTimestamp: new Date().setDate(new Date().getDate() - 1) },
+                { id: 30, title: 'Retail Sales Associate', company: 'T-Mobile', logo: 'https://logo.clearbit.com/t-mobile.com', location: 'Miami, FL', tags: ['Sales', 'Retail'], jobType: 'Part-time', category: 'Sales', salary: 38000, postedAgo: '2 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 2) },
+                { id: 31, title: 'Supply Chain Analyst', company: 'Walmart', logo: 'https://logo.clearbit.com/walmart.com', location: 'Bentonville, AR', tags: ['Logistics', 'Supply Chain'], jobType: 'Full-time', category: 'Sales', salary: 82000, postedAgo: '5 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 5) },
+                { id: 32, title: 'Accountant', company: 'Costco', logo: 'https://logo.clearbit.com/costco.com', location: 'Issaquah, WA', tags: ['Accounting'], jobType: 'Full-time', category: 'Finance', salary: 78000, postedAgo: '1 week ago', postedTimestamp: new Date().setDate(new Date().getDate() - 7) },
+                { id: 33, title: 'Financial Advisor', company: 'Wells Fargo', logo: 'https://logo.clearbit.com/wellsfargo.com', location: 'Charlotte, NC', tags: ['Wealth Management'], jobType: 'Full-time', category: 'Finance', salary: 92000, postedAgo: '2 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 2) },
+                { id: 34, title: 'Investment Banking Analyst', company: 'Goldman Sachs', logo: 'https://logo.clearbit.com/goldmansachs.com', location: 'New York, NY', tags: ['Investment Banking'], jobType: 'Full-time', category: 'Finance', salary: 115000, postedAgo: '3 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 3) },
+                { id: 35, title: 'Animator', company: 'Disney', logo: 'https://logo.clearbit.com/disney.com', location: 'Burbank, CA', tags: ['Animation', 'Creative'], jobType: 'Full-time', category: 'Design', salary: 98000, postedAgo: '1 week ago', postedTimestamp: new Date().setDate(new Date().getDate() - 7) },
+                { id: 36, title: 'Aerospace Engineer', company: 'NASA', logo: 'https://logo.clearbit.com/nasa.gov', location: 'Houston, TX', tags: ['Aerospace'], jobType: 'Full-time', category: 'Engineering', salary: 125000, postedAgo: '2 weeks ago', postedTimestamp: new Date().setDate(new Date().getDate() - 14) },
+                { id: 37, title: 'Mechanical Engineer', company: 'Tesla', logo: 'https://logo.clearbit.com/tesla.com', location: 'Palo Alto, CA', tags: ['Mechanical'], jobType: 'Full-time', category: 'Engineering', salary: 130000, postedAgo: '4 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 4) },
+                { id: 38, title: 'Automotive Technician', company: 'Ford', logo: 'https://logo.clearbit.com/ford.com', location: 'Dearborn, MI', tags: ['Automotive', 'Technician'], jobType: 'Full-time', category: 'Engineering', salary: 60000, postedAgo: '1 week ago', postedTimestamp: new Date().setDate(new Date().getDate() - 7) },
+                { id: 39, title: 'Structural Analyst Engineer', company: 'Boeing', logo: 'https://logo.clearbit.com/boeing.com', location: 'Everett, WA', tags: ['Aerospace'], jobType: 'Full-time', category: 'Engineering', salary: 118000, postedAgo: '2 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 2) },
+                { id: 40, title: 'Systems Engineer', company: 'Lockheed Martin', logo: 'https://logo.clearbit.com/lockheedmartin.com', location: 'Bethesda, MD', tags: ['Systems'], jobType: 'Full-time', category: 'Engineering', salary: 122000, postedAgo: '5 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 5) },
+                { id: 41, title: 'Healthcare Data Analyst', company: 'UnitedHealth Group', logo: 'https://logo.clearbit.com/unitedhealthgroup.com', location: 'Minnetonka, MN', tags: ['Data Analysis'], jobType: 'Full-time', category: 'Healthcare', salary: 93000, postedAgo: '1 week ago', postedTimestamp: new Date().setDate(new Date().getDate() - 7) },
+                { id: 42, title: 'Clinical Research Associate', company: 'Pfizer', logo: 'https://logo.clearbit.com/pfizer.com', location: 'New York, NY', tags: ['Research'], jobType: 'Full-time', category: 'Healthcare', salary: 88000, postedAgo: '2 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 2) },
+                { id: 43, title: 'Private Banker', company: 'JPMorgan Chase', logo: 'https://logo.clearbit.com/jpmorganchase.com', location: 'Chicago, IL', tags: ['Banking'], jobType: 'Full-time', category: 'Finance', salary: 130000, postedAgo: '4 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 4) },
+                { id: 44, title: 'Brand Manager', company: 'Procter & Gamble', logo: 'https://logo.clearbit.com/pg.com', location: 'Cincinnati, OH', tags: ['Brand Management'], jobType: 'Full-time', category: 'Marketing', salary: 112000, postedAgo: '1 week ago', postedTimestamp: new Date().setDate(new Date().getDate() - 7) },
+                { id: 45, title: 'Marketing Coordinator', company: 'Coca-Cola', logo: 'https://logo.clearbit.com/cocacola.com', location: 'Atlanta, GA', tags: ['Coordination'], jobType: 'Full-time', category: 'Marketing', salary: 65000, postedAgo: '2 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 2) },
+                { id: 46, title: 'Footwear Designer', company: 'Nike', logo: 'https://logo.clearbit.com/nike.com', location: 'Beaverton, OR', tags: ['Footwear'], jobType: 'Full-time', category: 'Design', salary: 95000, postedAgo: '5 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 5) },
+                { id: 47, title: 'Barista', company: 'Starbucks', logo: 'https://logo.clearbit.com/starbucks.com', location: 'Seattle, WA', tags: ['Customer Service'], jobType: 'Part-time', category: 'Food Service', salary: 35000, postedAgo: '1 day ago', postedTimestamp: new Date().setDate(new Date().getDate() - 1) },
+                { id: 48, title: 'Crew Member', company: 'McDonald\'s', logo: 'https://logo.clearbit.com/mcdonalds.com', location: 'Chicago, IL', tags: ['Team Member'], jobType: 'Part-time', category: 'Food Service', salary: 32000, postedAgo: '3 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 3) },
+                { id: 49, title: 'Sales Associate', company: 'The Home Depot', logo: 'https://logo.clearbit.com/homedepot.com', location: 'Atlanta, GA', tags: ['Sales'], jobType: 'Full-time', category: 'Retail', salary: 42000, postedAgo: '1 week ago', postedTimestamp: new Date().setDate(new Date().getDate() - 7) },
+                { id: 50, title: 'Customer Service Associate', company: 'Lowe\'s', logo: 'https://logo.clearbit.com/lowes.com', location: 'Mooresville, NC', tags: ['Customer Service'], jobType: 'Part-time', category: 'Retail', salary: 40000, postedAgo: '2 days ago', postedTimestamp: new Date().setDate(new Date().getDate() - 2) }
+            ];
+
+            const jobListingsContainer = document.getElementById('job-listings');
+            const paginationContainer = document.getElementById('pagination');
+            const resultsCountDisplay = document.getElementById('results-count-display');
+            const mobileResultsCount = document.getElementById('mobile-results-count');
+            
+            const keywordsInput = document.getElementById('keywords');
+            const locationInput = document.getElementById('location');
+            const jobTypeContainer = document.getElementById('job-type');
+            const experienceLevelSelect = document.getElementById('experience-level');
+            const salaryRange = document.getElementById('salary-range');
+            const salaryValue = document.getElementById('salary-value');
+            const resetFiltersBtn = document.getElementById('reset-filters');
+            const sortSelect = document.getElementById('sort-options');
+
+            let currentPage = 1;
+            const jobsPerPage = 10;
+            let currentFilteredJobs = [...jobsData];
+
+            const createJobCard = (job) => {
+                const jobCard = document.createElement('div');
+                jobCard.className = 'job-card';
+                jobCard.innerHTML = `
+                    <div class="job-card-header">
+                        <img src="${job.logo}" alt="${job.company} Logo" class="logo">
+                        <div class="info">
+                            <h3>${job.title}</h3>
+                            <span class="company">${job.company}</span>
+                        </div>
+                    </div>
+                    <div class="details">
+                        <span><i class="fas fa-map-marker-alt"></i> ${job.location}</span>
+                        <span><i class="fas fa-briefcase"></i> ${job.jobType}</span>
+                        <span><i class="fas fa-dollar-sign"></i> $${(job.salary / 1000)}k</span>
+                    </div>
+                    <div class="tags">
+                        ${job.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                    <div class="job-card-footer">
+                        <span class="posted-date">Posted ${job.postedAgo}</span>
+                        <a href="#" class="btn-apply">Apply Now</a>
+                    </div>
+                `;
+                return jobCard;
+            };
+
+            const updateResultsCount = (totalJobs, pageJobs) => {
+                const start = (currentPage - 1) * jobsPerPage + 1;
+                const end = start + pageJobs.length - 1;
+                const desktopText = totalJobs === 0 ? 'No jobs found' : `Showing <b>${start}-${end}</b> of <b>${totalJobs}</b> jobs`;
+                const mobileText = totalJobs === 0 ? '' : `<b>${totalJobs}</b> jobs found`;
+                
+                resultsCountDisplay.innerHTML = desktopText;
+                mobileResultsCount.innerHTML = mobileText;
+            };
+
+            const displayPage = (page) => {
+                currentPage = page;
+                jobListingsContainer.innerHTML = '';
+                
+                const paginatedJobs = currentFilteredJobs.slice((page - 1) * jobsPerPage, page * jobsPerPage);
+                paginatedJobs.forEach(job => jobListingsContainer.appendChild(createJobCard(job)));
+
+                updateResultsCount(currentFilteredJobs.length, paginatedJobs);
+                setupPagination();
+            };
+            
+            const setupPagination = () => {
+                paginationContainer.innerHTML = '';
+                const pageCount = Math.ceil(currentFilteredJobs.length / jobsPerPage);
+                if (pageCount <= 1) return;
+
+                for (let i = 1; i <= pageCount; i++) {
+                    const btn = document.createElement('button');
+                    btn.innerText = i;
+                    if (i === currentPage) btn.classList.add('active');
+                    btn.addEventListener('click', () => displayPage(i));
+                    paginationContainer.appendChild(btn);
+                }
+            };
+            
+            const updateDisplay = () => {
+                const keywords = keywordsInput.value.toLowerCase();
+                const location = locationInput.value.toLowerCase();
+                const selectedJobTypes = Array.from(jobTypeContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+                const experienceLevel = experienceLevelSelect.value;
+                const minSalary = parseInt(salaryRange.value) * 1000;
+
+                currentFilteredJobs = jobsData.filter(job => {
+                    const jobText = `${job.title} ${job.company} ${job.tags.join(' ')}`.toLowerCase();
+                    return jobText.includes(keywords) &&
+                           job.location.toLowerCase().includes(location) &&
+                           (selectedJobTypes.length === 0 || selectedJobTypes.includes(job.jobType)) &&
+                           (!experienceLevel || job.experience === experienceLevel) &&
+                           job.salary >= minSalary;
+                });
+
+                const sortOption = sortSelect.value;
+                if (sortOption === 'date') currentFilteredJobs.sort((a, b) => b.postedTimestamp - a.postedTimestamp);
+                if (sortOption === 'salary') currentFilteredJobs.sort((a, b) => b.salary - a.salary);
+                
+                displayPage(1);
+            };
+            
+            const resetFilters = () => {
+                document.querySelectorAll('aside input:not([type="range"])').forEach(input => input.value = '');
+                document.querySelectorAll('aside input[type="checkbox"]').forEach(cb => cb.checked = false);
+                experienceLevelSelect.value = '';
+                salaryRange.value = 0;
+                salaryValue.textContent = `$0k`;
+                sortSelect.value = 'relevance';
+                document.querySelectorAll('.custom-select-wrapper select').forEach(select => {
+                    select.dispatchEvent(new Event('changeForCustomSelect'));
+                });
+                updateDisplay();
+            };
+
+            [...document.querySelectorAll('aside input'), experienceLevelSelect, sortSelect].forEach(input => {
+                const eventType = ['range', 'text'].includes(input.type) ? 'input' : 'change';
+                input.addEventListener(eventType, updateDisplay);
+            });
+            
+            salaryRange.addEventListener('input', () => salaryValue.textContent = `$${salaryRange.value}k`);
+            resetFiltersBtn.addEventListener('click', resetFilters);
+
+            const initializeCustomSelect = (selectElement) => {
+                const customSelectWrapper = selectElement.parentElement;
+                const customSelect = document.createElement('div');
+                customSelect.className = 'custom-select';
+                const trigger = document.createElement('div');
+                trigger.className = 'custom-select__trigger';
+                trigger.innerHTML = `<span>${selectElement.options[selectElement.selectedIndex].textContent}</span>`;
+                const optionsContainer = document.createElement('ul');
+                optionsContainer.className = 'custom-select__options';
+
+                customSelect.append(trigger, optionsContainer);
+                customSelectWrapper.append(customSelect);
+
+                const updateCustomSelect = () => {
+                    const selectedOption = selectElement.options[selectElement.selectedIndex];
+                    trigger.querySelector('span').textContent = selectedOption.textContent;
+                    optionsContainer.querySelectorAll('.custom-select__option').forEach(opt => {
+                        opt.classList.toggle('selected', opt.dataset.value === selectedOption.value);
+                    });
+                };
+
+                Array.from(selectElement.options).forEach(option => {
+                    const li = document.createElement('li');
+                    li.className = 'custom-select__option';
+                    li.textContent = option.textContent;
+                    li.dataset.value = option.value;
+                    if (option.selected) li.classList.add('selected');
+                    optionsContainer.appendChild(li);
+                    li.addEventListener('click', e => {
+                        e.stopPropagation();
+                        selectElement.value = li.dataset.value;
+                        updateCustomSelect();
+                        customSelect.classList.remove('open');
+                        selectElement.dispatchEvent(new Event('change'));
+                    });
+                });
+
+                trigger.addEventListener('click', () => customSelect.classList.toggle('open'));
+                selectElement.addEventListener('changeForCustomSelect', updateCustomSelect);
+            };
+
+            window.addEventListener('click', e => {
+                document.querySelectorAll('.custom-select.open').forEach(select => {
+                    if (!select.contains(e.target)) select.classList.remove('open');
+                });
+            });
+
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mainNav = document.getElementById('main-nav');
+            mobileMenuToggle.addEventListener('click', () => mainNav.classList.toggle('active'));
+
+            const mobileFilterBtn = document.getElementById('mobile-filter-btn');
+            const filtersSidebar = document.getElementById('filters-sidebar');
+            const backdrop = document.getElementById('backdrop');
+            
+            const toggleFilters = () => {
+                filtersSidebar.classList.toggle('open');
+                backdrop.classList.toggle('active');
+            };
+
+            mobileFilterBtn.addEventListener('click', toggleFilters);
+            backdrop.addEventListener('click', toggleFilters);
+
+            initializeCustomSelect(document.getElementById('sort-options'));
+            initializeCustomSelect(document.getElementById('experience-level'));
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Job Application Portal{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    {# Include base CSS that applies to all pages #}
+    <style>
+        /* General Styles */
+        :root {
+            --primary-color: #2c3e50; /* Dark Blue */
+            --secondary-color: #3498db; /* Bright Blue */
+            --light-color: #f8f9f9; /* Lighter Gray */
+            --dark-color: #212f3d;   /* Darker Blue */
+            --white-color: #ffffff;
+            --text-color: #34495e; /* Grayish Blue */
+            --text-light-color: #7f8c8d;
+            --border-color: #e0e0e0;
+            --tag-bg-color: #ecf0f1;
+            --danger-color: #e74c3c;
+            --box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* Only in findjobs, companies*/
+
+            /* Fluid Typography */
+            --h1-size: clamp(2.2rem, 5vw, 3.2rem);
+            --h2-size: clamp(1.8rem, 4vw, 2.2rem);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+            background-color: var(--light-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Ensure footer sticks to bottom */
+        }
+
+        main { flex-grow: 1; } /* Main content expands to fill space */
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 20px;
+        }
+
+        h1, h2, h3, h4 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .section-padding { padding: 60px 0; } /* Adjusted from 80px for consistency on some pages */
+        .section-title { text-align: center; margin-bottom: 50px; font-size: var(--h2-size); }
+
+        .btn {
+            display: inline-block;
+            background: var(--secondary-color);
+            color: var(--white-color);
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.3s, transform 0.3s;
+            border: none; /* Added for consistency with dashboard buttons */
+            cursor: pointer; /* Added for consistency */
+            font-family: 'Poppins', sans-serif; /* Added for consistency */
+            font-size: 1rem; /* Added for consistency */
+        }
+        .btn:hover {
+            background: var(--primary-color);
+            color: var(--white-color);
+            transform: translateY(-2px);
+        }
+
+        /* Header */
+        .main-header {
+            background: var(--white-color);
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .main-header .container { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.8rem; font-weight: 700; color: var(--primary-color); text-decoration: none; }
+        .main-nav ul { display: flex; align-items: center; list-style: none; padding: 0; margin: 0; }
+        .main-nav ul li { margin-left: 25px; }
+        .main-nav ul li a { padding: 10px; font-weight: 500; color: var(--primary-color); text-decoration: none; transition: color 0.3s; }
+        .main-nav ul li a:hover, .main-nav ul li a.active { color: var(--secondary-color); }
+        .menu-toggle { display: none; cursor: pointer; font-size: 1.8rem; color: var(--primary-color); }
+
+        /* Login Button Style */
+        .main-nav .nav-btn {
+            background-color: var(--secondary-color);
+            color: var(--white-color);
+            padding: 9px 22px;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .main-nav .nav-btn:hover {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(44, 62, 80, 0.2);
+        }
+
+        #showLoginLink,#showRegisterLink{
+            display: inline; 
+            font-weight: 600;
+            color: #3498db;
+        }
+
+        /* Footer */
+        .main-footer { background: var(--dark-color); color: var(--light-color); padding: 50px 0 20px; }
+        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        .footer-section h3 { margin-bottom: 20px; color: var(--white-color); }
+        .footer-section p { color: var(--text-light-color); }
+        .footer-section ul { padding: 0; list-style: none; }
+        .footer-section ul li { margin-bottom: 10px; }
+        .footer-section ul li a { color: var(--text-light-color); text-decoration: none; transition: color 0.3s; }
+        .footer-section ul li a:hover { color: var(--secondary-color); }
+        .footer-bottom { text-align: center; border-top: 1px solid #444; padding-top: 20px; }
+        .footer-bottom p { margin: 0; color: var(--text-light-color); font-size: 0.9rem; }
+
+        /* Responsive Styles for Header/Footer (General) */
+        @media(max-width: 992px) {
+            .main-nav {
+                display: none;
+                width: 100%;
+                background: var(--white-color);
+                position: absolute;
+                top: 100%; /* Position below header */
+                left: 0;
+                background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent */
+                box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            }
+            .main-nav.active { display: block; }
+            .main-nav ul { flex-direction: column; align-items: stretch; }
+            .main-nav ul li { margin: 0; width: 100%; text-align: center; }
+            .main-nav ul li a { display: block; padding: 15px; border-bottom: 1px solid var(--border-color); }
+            .main-nav .nav-btn {
+                display: block;
+                margin: 15px;
+                width: auto; /* Adjust for full width within parent */
+            }
+            .menu-toggle { display: block; }
+        }
+        @media(max-width: 768px) {
+            .section-padding { padding: 40px 0; } /* Adjust padding for smaller screens */
+            .footer-content { text-align: center; }
+        }
+    </style>
+    <link rel="stylesheet" href="{% static 'jobs/css/auth_modal.css' %}"> {# Link the new modal CSS #}
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container">
+            <a href="{% url 'homepage' %}" class="logo">JobPortal</a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="{% url 'find_jobs' %}" {% if request.resolver_match.url_name == 'find_jobs' %}class="active"{% endif %}>Find Jobs</a></li>
+                    <li><a href="{% url 'companies' %}" {% if request.resolver_match.url_name == 'companies' %}class="active"{% endif %}>Companies</a></li>
+                    <li><a href="{% url 'about_us' %}" {% if request.resolver_match.url_name == 'about_us' %}class="active"{% endif %}>About Us</a></li>
+                    <li><a href="{% url 'contact' %}" {% if request.resolver_match.url_name == 'contact' %}class="active"{% endif %}>Contact</a></li>
+                    <li><a href="{% url 'employer_dashboard' %}" {% if request.resolver_match.url_name == 'employer_dashboard' %}class="active"{% endif %}>For Employers</a></li>
+                    <li><a href="#" class="nav-btn">Login</a></li> {# This link will now open the modal #}
+                </ul>
+            </nav>
+            <div class="menu-toggle" id="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}
+        {# Content from child templates goes here #}
+        {% endblock %}
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section"><h3>About Us</h3><p>We are dedicated to connecting talented individuals with their dream jobs.</p></div>
+                <div class="footer-section"><h3>Quick Links</h3><ul><li><a href="{% url 'find_jobs' %}">Jobs</a></li><li><a href="{% url 'companies' %}">Companies</a></li><li><a href="{% url 'about_us' %}">About</a></li></ul></div>
+                <div class="footer-section"><h3>Follow Us</h3><ul><li><a href="#">Facebook</a></li><li><a href="#">Twitter</a></li><li><a href="#">LinkedIn</a></li></ul></div>
+            </div>
+            <div class="footer-bottom"><p>&copy; 2025 Job Application Portal. All rights reserved.</p></div>
+        </div>
+    </footer>
+
+    {# AUTHENTICATION MODAL HTML #}
+    <div id="authModalOverlay" class="auth-modal-overlay">
+        <div class="auth-modal-content">
+            <span class="auth-modal-close-btn" id="authModalCloseBtn">&times;</span>
+
+            {# Login Form View #}
+            <div id="loginView" class="active">
+                <h2 class="auth-modal-title">Welcome Back!</h2>
+                <form id="loginForm" method="POST" action="{% url 'login' %}"> {# action will point to your Django login view #}
+                    {% csrf_token %}
+                    <div class="auth-form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" name="email" placeholder="your@example.com" required>
+                    </div>
+                    <div class="auth-form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" name="password" placeholder="********" required>
+                    </div>
+                    <button type="submit" class="auth-form-submit-btn">Login</button>
+                    <a href="#" class="auth-form-footer-link">Forgot Password?</a>
+                    <p class="auth-form-footer-link" style="margin-top: 15px; color: var(--text-light-color);">Don't have an account? <a href="#" id="showRegisterLink" >Register</a></p>
+                </form>
+            </div>
+
+            {# Registration Form View #}
+            <div id="registerView">
+                <h2 class="auth-modal-title">Join Us!</h2>
+                <form id="registerForm" method="POST" action="{% url 'register' %}"> {# action will point to your Django register view #}
+                    {% csrf_token %}
+                    <div class="auth-form-group">
+                        <label for="registerUsername">Username</label>
+                        <input type="text" id="registerUsername" name="username" placeholder="Choose a username" required>
+                    </div>
+                    <div class="auth-form-group">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" name="email" placeholder="your@example.com" required>
+                    </div>
+                    <div class="auth-form-group">
+                        <label for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" name="password" placeholder="********" required>
+                    </div>
+                    <div class="auth-form-group">
+                        <label for="registerConfirmPassword">Confirm Password</label>
+                        <input type="password" id="registerConfirmPassword" name="confirm_password" placeholder="********" required>
+                    </div>
+                    <button type="submit" class="auth-form-submit-btn">Register</button>
+                    <p class="auth-form-footer-link" style="margin-top: 15px; color: var(--text-light-color);">Already have an account? <a href="#" id="showLoginLink" >Login</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+    {# END AUTHENTICATION MODAL HTML #}
+
+    <script>
+        // --- MOBILE MENU (Already present in base.html) ---
+        const menuToggle = document.getElementById('mobile-menu');
+        const mainNav = document.querySelector('.main-nav');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => mainNav.classList.toggle('active'));
+        }
+    </script>
+    <script src="{% static 'jobs/js/auth_modal.js' %}"></script> {# Link the new modal JS #}
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

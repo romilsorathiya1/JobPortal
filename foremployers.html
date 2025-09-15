@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employer Dashboard - Job Application Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Styles */
+        :root {
+            --primary-color: #2c3e50; /* Dark Blue */
+            --secondary-color: #3498db; /* Bright Blue */
+            --light-color: #f8f9f9; /* Lighter Gray */
+            --dark-color: #212f3d;   /* Darker Blue */
+            --white-color: #ffffff;
+            --text-color: #34495e; /* Grayish Blue */
+            --text-light-color: #7f8c8d;
+            --border-color: #e0e0e0;
+            --danger-color: #e74c3c;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+            background-color: var(--light-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        main { flex-grow: 1; }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 20px;
+        }
+
+        h1, h2, h3, h4 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--secondary-color);
+            color: var(--white-color);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .btn:hover { background: var(--primary-color); }
+        .btn-outline {
+            background: transparent;
+            color: var(--secondary-color);
+            border: 1px solid var(--secondary-color);
+        }
+        .btn-outline:hover { background: var(--secondary-color); color: var(--white-color); }
+
+        /* --- Header (Same as Homepage) --- */
+        .main-header {
+            background: var(--white-color);
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .main-header .container { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.8rem; font-weight: 700; color: var(--primary-color); text-decoration: none; }
+        .main-nav ul { display: flex; align-items: center; list-style: none; padding: 0; margin: 0; }
+        .main-nav ul li { margin-left: 25px; }
+        .main-nav ul li a { padding: 10px; font-weight: 500; color: var(--primary-color); text-decoration: none; transition: color 0.3s; }
+        .main-nav ul li a:hover, .main-nav ul li a.active { color: var(--secondary-color); }
+        .menu-toggle { display: none; cursor: pointer; font-size: 1.8rem; color: var(--primary-color); }
+
+        /* --- START: ADMIN PANEL LAYOUT --- */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: auto;
+            padding: 30px 20px;
+        }
+        .dashboard-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 30px;
+        }
+        .dashboard-sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 97px; /* Header height (67px) + top padding (30px) */
+            height: calc(100vh - 127px); /* Full height minus header and padding */
+            overflow-y: auto;
+            background: var(--white-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* ADDED: Transition */
+        }
+        .sidebar-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-nav ul li a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .sidebar-nav ul li a:hover {
+            background-color: var(--light-color);
+        }
+        .sidebar-nav ul li a.active {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+        }
+        .dashboard-main-content {
+            flex-grow: 1;
+        }
+
+        /* NEW: Mobile Sidebar Toggle Button & Overlay */
+        .sidebar-toggle-btn {
+            display: none; /* Hidden on desktop */
+            position: fixed;
+            top: 80px;
+            left: 15px;
+            z-index: 1050;
+            background: var(--primary-color);
+            color: var(--white-color);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+        .dashboard-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1999; /* Below sidebar, above content */
+        }
+
+        /* --- Reusable Panel Component --- */
+        .panel {
+            background: var(--white-color);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .panel-title { font-size: 1.5rem; }
+        
+        /* --- Views (to be toggled by JS) --- */
+        .view { display: none; }
+        .view.active { display: block; }
+        
+        /* --- Dashboard View Specifics --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: var(--white-color);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .stat-card .stat-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: var(--text-light-color);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .stat-card .stat-icon { font-size: 1.5rem; color: var(--secondary-color); }
+        .stat-card .stat-value { font-size: 2.2rem; font-weight: 600; }
+        
+        /* --- Jobs & Applicants Table Styling --- */
+        .table-responsive { overflow-x: auto; }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        .data-table th, .data-table td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+        .data-table thead { background: var(--light-color); }
+        .data-table th { font-weight: 600; }
+        .data-table tbody tr { border-bottom: 1px solid var(--border-color); }
+        .data-table tbody tr:last-child { border-bottom: none; }
+        .data-table tbody tr:hover { background-color: #fdfdfd; }
+
+        .status-tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .status-active { background-color: #eaf7ed; color: #2ecc71; }
+        .status-closed { background-color: #f2f2f2; color: #7f8c8d; }
+        .action-buttons button { background: none; border: none; cursor: pointer; color: var(--text-light-color); font-size: 1.1rem; padding: 5px; transition: color 0.2s; }
+        .action-buttons button:hover { color: var(--secondary-color); }
+        .action-buttons button.active { color: var(--secondary-color); }
+        /* ADDED: Style for delete button hover */
+        .action-buttons button.delete-btn:hover { color: var(--danger-color); }
+        .applicant-info { display: flex; align-items: center; gap: 15px; }
+        .applicant-avatar { width: 45px; height: 45px; border-radius: 50%; }
+
+        /* --- Custom Select Styles --- */
+        .custom-select-wrapper { 
+            position: relative; 
+            width: 200px; 
+        }
+        .job-form .custom-select-wrapper {
+            width: 100%;
+        }
+        .custom-select { font-size: 0.95rem; }
+        .custom-select__trigger {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            background: var(--white-color);
+            transition: border-color 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .custom-select__trigger:after {
+            content: '\f078';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+        .custom-select.open .custom-select__trigger { border-color: var(--secondary-color); }
+        .custom-select.open .custom-select__trigger:after { transform: rotate(180deg); }
+        .custom-select__options {
+            position: absolute;
+            top: 110%;
+            left: 0;
+            right: 0;
+            background: var(--white-color);
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 10;
+            list-style: none;
+            padding: 5px 0;
+            margin: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
+        }
+        .custom-select.open .custom-select__options {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .custom-select__option {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .custom-select__option:hover, .custom-select__option.selected {
+            background-color: var(--light-color);
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+        
+        /* --- Job Form Styles --- */
+        .job-form .form-group { margin-bottom: 20px; }
+        .job-form .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .job-form .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .job-form .form-control:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+        }
+        .job-form textarea.form-control {
+            height: 120px;
+            resize: vertical;
+        }
+        .job-form .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        /* Footer (Same as Homepage) */
+        .main-footer { background: var(--dark-color); color: var(--light-color); padding: 50px 0 20px; }
+        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        .footer-section h3 { margin-bottom: 20px; color: var(--white-color); }
+        .footer-section p { color: var(--text-light-color); }
+        .footer-section ul { padding: 0; list-style: none; }
+        .footer-section ul li { margin-bottom: 10px; }
+        .footer-section ul li a { color: var(--text-light-color); text-decoration: none; transition: color 0.3s; }
+        .footer-section ul li a:hover { color: var(--secondary-color); }
+        .footer-bottom { text-align: center; border-top: 1px solid #444; padding-top: 20px; }
+        .footer-bottom p { margin: 0; color: var(--text-light-color); font-size: 0.9rem; }
+        
+        /* --- RESPONSIVE STYLES --- */
+        @media(max-width: 992px) {
+            .main-nav { display: none; }
+            .menu-toggle { display: block; }
+            .main-nav.active { display: block; width: 100%; position: absolute; top: 100%; left: 0; background-color: var(--white-color); box-shadow: 0 5px 10px rgba(0,0,0,0.1); }
+            .main-nav ul { flex-direction: column; align-items: stretch; }
+            .main-nav ul li { margin: 0; width: 100%; text-align: center; }
+            .main-nav ul li a { display: block; padding: 15px; border-bottom: 1px solid var(--border-color); }
+
+            .dashboard-wrapper { display: block; }
+            
+            /* UPDATED: Mobile Sidebar Styles */
+            .dashboard-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 280px;
+                height: 100%;
+                z-index: 2000;
+                transform: translateX(-100%);
+                box-shadow: 5px 0 25px rgba(0,0,0,0.1);
+                border-radius: 0;
+                border-right: 1px solid var(--border-color);
+            }
+            .dashboard-sidebar.active {
+                transform: translateX(0);
+            }
+            .sidebar-toggle-btn {
+                display: block;
+            }
+            .dashboard-overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container">
+            <a href="#" class="logo">JobPortal</a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#">Find Jobs</a></li>
+                    <li><a href="#">Companies</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">For Employers</a></li>
+                    <li><a href="#" class="nav-btn">Login</a></li>
+                </ul>
+            </nav>
+            <div class="menu-toggle" id="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="dashboard-container">
+            <!-- NEW: Sidebar Toggle Button and Overlay -->
+            <button class="sidebar-toggle-btn" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+            <div class="dashboard-overlay" id="dashboard-overlay"></div>
+
+            <div class="dashboard-wrapper">
+                <nav class="dashboard-sidebar" id="dashboard-sidebar">
+                    <div class="sidebar-nav">
+                        <ul>
+                            <li><a href="#" class="nav-link active" data-view="dashboard-view"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                            <li><a href="#" class="nav-link" data-view="jobs-view"><i class="fas fa-briefcase"></i> Manage Jobs</a></li>
+                            <li><a href="#" class="nav-link" data-view="all-applicants-view"><i class="fas fa-file-alt"></i> All Applicants</a></li>
+                            <li><a href="#" class="nav-link" data-view="selected-view"><i class="fas fa-user-check"></i> Selected Applicants</a></li>
+                            <li><a href="#" class="nav-link" data-view="rejected-view"><i class="fas fa-user-times"></i> Rejected Applicants</a></li>
+                        </ul>
+                    </div>
+                </nav>
+
+                <div class="dashboard-main-content">
+                    <!-- VIEW 1: Main Dashboard -->
+                    <div id="dashboard-view" class="view active">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-title"><span>Active Jobs</span><i class="fas fa-briefcase stat-icon"></i></div>
+                                <div class="stat-value" id="stat-active-jobs">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title"><span>Total Applicants</span><i class="fas fa-users stat-icon"></i></div>
+                                <div class="stat-value" id="stat-total-applicants">0</div>
+                            </div>
+                             <div class="stat-card">
+                                <div class="stat-title"><span>Pending Review</span><i class="fas fa-file-signature stat-icon"></i></div>
+                                <div class="stat-value" id="stat-pending-review">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title"><span>Selected</span><i class="fas fa-user-check stat-icon"></i></div>
+                                <div class="stat-value" id="stat-selected">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title"><span>Rejected</span><i class="fas fa-user-times stat-icon"></i></div>
+                                <div class="stat-value" id="stat-rejected">0</div>
+                            </div>
+                             <div class="stat-card">
+                                <div class="stat-title"><span>Hired</span><i class="fas fa-award stat-icon"></i></div>
+                                <div class="stat-value" id="stat-hired">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title">Application Analytics</h2>
+                                <span style="color: var(--text-light-color);">Last 365 Days</span>
+                            </div>
+                            <div>
+                                <canvas id="applicationChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 2: Manage Jobs List -->
+                    <div id="jobs-view" class="view">
+                         <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title">Manage Job Listings</h2>
+                                <button class="btn" id="post-job-btn"><i class="fas fa-plus-circle"></i> Post Job</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="jobs-table-body">
+                                    <!-- Populated by JS -->
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 3: Applicants for a Specific Job -->
+                    <div id="applicants-view" class="view">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <div>
+                                   <h2 class="panel-title" id="applicants-job-title">Applicants</h2>
+                                   <p id="applicants-job-count" style="color: var(--text-light-color);"></p>
+                                </div>
+                                <button class="btn btn-outline" id="back-to-jobs-btn"><i class="fas fa-arrow-left"></i> Back to Jobs</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="applicants-table-body">
+                                    <!-- Populated by JS -->
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                     <!-- VIEW 4: All Applicants List -->
+                    <div id="all-applicants-view" class="view">
+                         <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title">All Applicants</h2>
+                                <div class="custom-select-wrapper">
+                                    <div class="custom-select" id="all-applicants-filter">
+                                        <div class="custom-select__trigger"><span>All Statuses</span></div>
+                                        <ul class="custom-select__options">
+                                            <li class="custom-select__option selected" data-value="All">All Statuses</li>
+                                            <li class="custom-select__option" data-value="Applied">Applied</li>
+                                            <li class="custom-select__option" data-value="Shortlisted">Shortlisted</li>
+                                            <li class="custom-select__option" data-value="Hired">Hired</li>
+                                            <li class="custom-select__option" data-value="Rejected">Rejected</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="all-applicants-table-body">
+                                    <!-- Populated by JS -->
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 5: Selected Applicants -->
+                    <div id="selected-view" class="view">
+                         <div class="panel">
+                            <div class="panel-header">
+                                <div>
+                                    <h2 class="panel-title">Selected Applicants</h2>
+                                    <p style="color: var(--text-light-color);">Candidates shortlisted or hired in the last 365 days.</p>
+                                </div>
+                                <div class="custom-select-wrapper">
+                                    <div class="custom-select" id="selected-applicants-filter">
+                                        <div class="custom-select__trigger"><span>All Selected</span></div>
+                                        <ul class="custom-select__options">
+                                            <li class="custom-select__option selected" data-value="All">All Selected</li>
+                                            <li class="custom-select__option" data-value="Shortlisted">Shortlisted</li>
+                                            <li class="custom-select__option" data-value="Hired">Hired</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="selected-applicants-table-body">
+                                    <!-- Populated by JS -->
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 6: Rejected Applicants -->
+                    <div id="rejected-view" class="view">
+                         <div class="panel">
+                             <div class="panel-header">
+                                <div>
+                                    <h2 class="panel-title">Rejected Applicants</h2>
+                                    <p style="color: var(--text-light-color);">Candidates rejected in the last 365 days.</p>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="rejected-applicants-table-body">
+                                    <!-- Populated by JS -->
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 7: Post/Edit Job Form -->
+                    <div id="job-form-view" class="view">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title" id="job-form-title">Post a New Job</h2>
+                            </div>
+                            <form id="job-form" class="job-form">
+                                <input type="hidden" id="job-id-input">
+                                <div class="form-group">
+                                    <label for="job-title">Job Title</label>
+                                    <input type="text" id="job-title" class="form-control" required>
+                                </div>
+                                 <div class="form-group">
+                                    <label for="job-status">Status</label>
+                                    <input type="hidden" id="job-status" value="Active">
+                                    <div class="custom-select-wrapper">
+                                        <div class="custom-select" id="job-status-select">
+                                            <div class="custom-select__trigger"><span>Active</span></div>
+                                            <ul class="custom-select__options">
+                                                <li class="custom-select__option selected" data-value="Active">Active</li>
+                                                <li class="custom-select__option" data-value="Closed">Closed</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-outline" id="cancel-job-form">Cancel</button>
+                                    <button type="submit" class="btn">Save Job</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section"><h3>About Us</h3><p>We are dedicated to connecting talented individuals with their dream jobs.</p></div>
+                <div class="footer-section"><h3>Quick Links</h3><ul><li><a href="#">Jobs</a></li><li><a href="#">Companies</a></li><li><a href="#">About</a></li></ul></div>
+                <div class="footer-section"><h3>Follow Us</h3><ul><li><a href="#">Facebook</a></li><li><a href="#">Twitter</a></li><li><a href="#">LinkedIn</a></li></ul></div>
+            </div>
+            <div class="footer-bottom"><p>&copy; 2025 Job Application Portal. All rights reserved.</p></div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- DATA SIMULATION ---
+            let jobs = [
+                { id: 1, title: "Senior Frontend Developer", posted: "Aug 15, 2025", status: "Active", views: 1204 },
+                { id: 2, title: "UX/UI Designer", posted: "Aug 10, 2025", status: "Active", views: 856 },
+                { id: 3, title: "Project Manager", posted: "Jul 28, 2025", status: "Closed", views: 2510 },
+                { id: 4, title: "Backend Engineer", posted: "Aug 18, 2025", status: "Active", views: 530 }
+            ];
+            let applicants = [
+                { id: 101, name: "Priya Sharma", avatar: "https://i.pravatar.cc/150?u=priya", appliedForJobId: 1, date: "Aug 20, 2025", status: "Applied" },
+                { id: 102, name: "Anjali Singh", avatar: "https://i.pravatar.cc/150?u=anjali", appliedForJobId: 1, date: "Aug 19, 2025", status: "Shortlisted" },
+                { id: 103, name: "Rohan Patel", avatar: "https://i.pravatar.cc/150?u=rohan", appliedForJobId: 2, date: "Aug 18, 2025", status: "Applied" },
+                { id: 104, name: "Sameer Khan", avatar: "https://i.pravatar.cc/150?u=sameer", appliedForJobId: 3, date: "Aug 01, 2025", status: "Hired" },
+                { id: 105, name: "Neha Desai", avatar: "https://i.pravatar.cc/150?u=neha", appliedForJobId: 2, date: "Aug 15, 2025", status: "Rejected" },
+                { id: 106, name: "Vikram Rathod", avatar: "https://i.pravatar.cc/150?u=vikram", appliedForJobId: 1, date: "Aug 21, 2025", status: "Applied" },
+                { id: 107, name: "Aditi Joshi", avatar: "https://i.pravatar.cc/150?u=aditi", appliedForJobId: 4, date: "Aug 22, 2025", status: "Shortlisted" }
+            ];
+
+            // --- STATE MANAGEMENT ---
+            let currentAllApplicantsFilter = 'All';
+            let currentSelectedApplicantsFilter = 'All';
+            let currentJobIdForView = null;
+
+            // --- UI ELEMENTS ---
+            const views = document.querySelectorAll('.view');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileMenuToggle = document.getElementById('mobile-menu');
+            const mainNav = document.querySelector('.main-nav');
+            const jobForm = document.getElementById('job-form');
+            // NEW: Mobile Sidebar Elements
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const dashboardSidebar = document.getElementById('dashboard-sidebar');
+            const dashboardOverlay = document.getElementById('dashboard-overlay');
+            
+            // --- VIEW NAVIGATION LOGIC ---
+            function showView(viewId) {
+                if (viewId !== 'applicants-view') {
+                    currentJobIdForView = null;
+                }
+
+                views.forEach(view => view.classList.remove('active'));
+                const viewToShow = document.getElementById(viewId);
+                if(viewToShow) viewToShow.classList.add('active');
+
+                const isJobFormView = viewId === 'job-form-view';
+                navLinks.forEach(link => {
+                    const isApplicantsView = viewId === 'applicants-view' && link.dataset.view === 'jobs-view';
+                    let isActive = link.dataset.view === viewId || isApplicantsView || (isJobFormView && link.dataset.view === 'jobs-view');
+                    link.classList.toggle('active', isActive);
+                });
+
+                // NEW: Close sidebar on navigation
+                if (dashboardSidebar.classList.contains('active')) {
+                    toggleSidebar();
+                }
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showView(link.dataset.view);
+                });
+            });
+
+            // --- DATA & RENDERING ---
+            function updateDashboardStats() {
+                document.getElementById('stat-active-jobs').textContent = jobs.filter(j => j.status === 'Active').length;
+                document.getElementById('stat-total-applicants').textContent = applicants.length;
+                document.getElementById('stat-pending-review').textContent = applicants.filter(a => a.status === 'Applied').length;
+                document.getElementById('stat-selected').textContent = applicants.filter(a => a.status === 'Shortlisted').length;
+                document.getElementById('stat-rejected').textContent = applicants.filter(a => a.status === 'Rejected').length;
+                document.getElementById('stat-hired').textContent = applicants.filter(a => a.status === 'Hired').length;
+            }
+
+            function renderJobs() {
+                const jobsTableBody = document.getElementById('jobs-table-body');
+                let html = `<thead><tr><th>Job Title</th><th>Status</th><th>Views</th><th>Applicants</th><th>Actions</th></tr></thead><tbody>`;
+                jobs.forEach(job => {
+                    const applicantCount = applicants.filter(a => a.appliedForJobId === job.id).length;
+                    html += `
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600;">${job.title}</div>
+                                <div style="font-size: 0.9rem; color: var(--text-light-color);">Posted on ${job.posted}</div>
+                            </td>
+                            <td><span class="status-tag ${job.status === 'Active' ? 'status-active' : 'status-closed'}">${job.status}</span></td>
+                            <td>${job.views.toLocaleString()}</td>
+                            <td style="text-align: center;">${applicantCount}</td>
+                            <td class="action-buttons">
+                                <button class="view-applicants-btn" data-job-id="${job.id}" title="View Applicants"><i class="fas fa-users"></i></button>
+                                <button class="edit-job-btn" data-job-id="${job.id}" title="Edit Job"><i class="fas fa-edit"></i></button>
+                                <!-- UPDATED: Added class and data-attribute -->
+                                <button class="delete-btn delete-job-btn" data-job-id="${job.id}" title="Delete Job"><i class="fas fa-trash-alt"></i></button>
+                            </td>
+                        </tr>`;
+                });
+                html += `</tbody>`;
+                jobsTableBody.innerHTML = html;
+            }
+            
+            function renderAllApplicants(statusFilter = 'All') {
+                currentAllApplicantsFilter = statusFilter;
+                const allApplicantsTableBody = document.getElementById('all-applicants-table-body');
+                let filteredApplicants = [...applicants];
+                if (statusFilter !== 'All') {
+                    filteredApplicants = filteredApplicants.filter(applicant => applicant.status === statusFilter);
+                }
+                filteredApplicants.sort((a, b) => new Date(b.date) - new Date(a.date));
+                let html = `<thead><tr><th>Candidate Name</th><th>Applied For</th><th>Applied On</th><th>Status</th><th>Actions</th></tr></thead><tbody>`;
+                if (filteredApplicants.length > 0) {
+                    filteredApplicants.forEach(applicant => {
+                        const job = jobs.find(j => j.id === applicant.appliedForJobId);
+                        
+                        const isShortlisted = ['Shortlisted', 'Hired'].includes(applicant.status);
+                        const isRejected = applicant.status === 'Rejected';
+                        const isHired = applicant.status === 'Hired';
+
+                        const shortlistBtnClass = isShortlisted ? 'active' : '';
+                        const rejectBtnClass = isRejected ? 'active' : '';
+                        const hireBtnClass = isHired ? 'active' : '';
+                        
+                        const shortlistBtnTitle = isShortlisted ? 'Shortlisted' : 'Shortlist';
+                        const rejectBtnTitle = isRejected ? 'Rejected' : 'Reject';
+                        const hireBtnTitle = isHired ? 'Hired' : 'Mark as Hired';
+
+                        html += `
+                            <tr>
+                                <td>
+                                    <div class="applicant-info">
+                                        <img src="${applicant.avatar}" alt="${applicant.name}" class="applicant-avatar">
+                                        <div>
+                                            <div style="font-weight: 600;">${applicant.name}</div>
+                                            <a href="#" style="font-size: 0.9rem; color: var(--secondary-color);">View Resume</a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>${job ? job.title : 'N/A'}</td>
+                                <td>${applicant.date}</td>
+                                <td>${applicant.status}</td>
+                                <td class="action-buttons">
+                                    <button class="shortlist-btn ${shortlistBtnClass}" data-applicant-id="${applicant.id}" title="${shortlistBtnTitle}"><i class="fas fa-check-circle"></i></button>
+                                    <button class="reject-btn ${rejectBtnClass}" data-applicant-id="${applicant.id}" title="${rejectBtnTitle}"><i class="fas fa-times-circle"></i></button>
+                                    <button class="hire-btn ${hireBtnClass}" data-applicant-id="${applicant.id}" title="${hireBtnTitle}"><i class="fas fa-award"></i></button>
+                                </td>
+                            </tr>`;
+                    });
+                } else {
+                     html += `<tr><td colspan="5" style="text-align:center; padding: 30px;">No applicants found with this status.</td></tr>`;
+                }
+                html += `</tbody>`;
+                allApplicantsTableBody.innerHTML = html;
+            }
+
+            function renderApplicantsForJob(jobId) {
+                currentJobIdForView = jobId;
+                const applicantsTableBody = document.getElementById('applicants-table-body');
+                const applicantsJobTitle = document.getElementById('applicants-job-title');
+                const applicantsJobCount = document.getElementById('applicants-job-count');
+                const job = jobs.find(j => j.id === jobId);
+                const jobApplicants = applicants
+                    .filter(a => a.appliedForJobId === jobId)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+                applicantsJobTitle.textContent = `Applicants for "${job.title}"`;
+                applicantsJobCount.textContent = `${jobApplicants.length} candidate(s) found.`;
+                let html = `<thead><tr><th>Candidate Name</th><th>Applied On</th><th>Status</th><th>Actions</th></tr></thead><tbody>`;
+                if (jobApplicants.length > 0) {
+                    jobApplicants.forEach(applicant => {
+                        const isShortlisted = ['Shortlisted', 'Hired'].includes(applicant.status);
+                        const isRejected = applicant.status === 'Rejected';
+                        const isHired = applicant.status === 'Hired';
+
+                        const shortlistBtnClass = isShortlisted ? 'active' : '';
+                        const rejectBtnClass = isRejected ? 'active' : '';
+                        const hireBtnClass = isHired ? 'active' : '';
+                        
+                        const shortlistBtnTitle = isShortlisted ? 'Shortlisted' : 'Shortlist';
+                        const rejectBtnTitle = isRejected ? 'Rejected' : 'Reject';
+                        const hireBtnTitle = isHired ? 'Hired' : 'Mark as Hired';
+
+                        html += `
+                            <tr>
+                                <td>
+                                    <div class="applicant-info">
+                                        <img src="${applicant.avatar}" alt="${applicant.name}" class="applicant-avatar">
+                                        <div>
+                                            <div style="font-weight: 600;">${applicant.name}</div>
+                                            <a href="#" style="font-size: 0.9rem; color: var(--secondary-color);">View Resume</a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>${applicant.date}</td>
+                                <td>${applicant.status}</td>
+                                <td class="action-buttons">
+                                     <button class="shortlist-btn ${shortlistBtnClass}" data-applicant-id="${applicant.id}" title="${shortlistBtnTitle}"><i class="fas fa-check-circle"></i></button>
+                                     <button class="reject-btn ${rejectBtnClass}" data-applicant-id="${applicant.id}" title="${rejectBtnTitle}"><i class="fas fa-times-circle"></i></button>
+                                     <button class="hire-btn ${hireBtnClass}" data-applicant-id="${applicant.id}" title="${hireBtnTitle}"><i class="fas fa-award"></i></button>
+                                </td>
+                            </tr>`;
+                    });
+                } else {
+                    html += `<tr><td colspan="4" style="text-align:center; padding: 30px;">No applicants yet for this position.</td></tr>`;
+                }
+                html += `</tbody>`;
+                applicantsTableBody.innerHTML = html;
+                showView('applicants-view');
+            }
+
+            function renderFilteredApplicants(statusList, tableId) {
+                const tableBody = document.getElementById(tableId);
+                const filteredApplicants = applicants
+                    .filter(applicant => statusList.includes(applicant.status))
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+                let html = `<thead><tr><th>Candidate Name</th><th>Applied For</th><th>Applied On</th><th>Status</th></tr></thead><tbody>`;
+                if (filteredApplicants.length > 0) {
+                    filteredApplicants.forEach(applicant => {
+                        const job = jobs.find(j => j.id === applicant.appliedForJobId);
+                        html += `
+                            <tr>
+                                <td>
+                                    <div class="applicant-info">
+                                        <img src="${applicant.avatar}" alt="${applicant.name}" class="applicant-avatar">
+                                        <div>
+                                            <div style="font-weight: 600;">${applicant.name}</div>
+                                            <a href="#" style="font-size: 0.9rem; color: var(--secondary-color);">View Resume</a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>${job ? job.title : 'N/A'}</td>
+                                <td>${applicant.date}</td>
+                                <td>${applicant.status}</td>
+                            </tr>`;
+                    });
+                } else {
+                     html += `<tr><td colspan="4" style="text-align:center; padding: 30px;">No applicants found in this category.</td></tr>`;
+                }
+                html += `</tbody>`;
+                tableBody.innerHTML = html;
+            }
+
+            function renderSelectedApplicants(statusFilter = 'All') {
+                currentSelectedApplicantsFilter = statusFilter;
+                let baseStatuses = ['Shortlisted', 'Hired'];
+                 if (statusFilter !== 'All') {
+                    baseStatuses = [statusFilter];
+                }
+                renderFilteredApplicants(baseStatuses, 'selected-applicants-table-body');
+            }
+
+             // --- CUSTOM SELECT DROPDOWN LOGIC ---
+            function setupCustomSelect(selectId, callback) {
+                const selectElement = document.getElementById(selectId);
+                if (!selectElement) return;
+                const trigger = selectElement.querySelector('.custom-select__trigger');
+                const options = selectElement.querySelectorAll('.custom-select__option');
+                const triggerText = trigger.querySelector('span');
+                trigger.addEventListener('click', () => selectElement.classList.toggle('open'));
+                options.forEach(option => {
+                    option.addEventListener('click', () => {
+                        const selectedValue = option.dataset.value;
+                        triggerText.textContent = option.textContent;
+                        options.forEach(opt => opt.classList.remove('selected'));
+                        option.classList.add('selected');
+                        selectElement.classList.remove('open');
+                        if(callback) callback(selectedValue);
+                    });
+                });
+            }
+
+            function setCustomSelectValue(selectId, value) {
+                const selectElement = document.getElementById(selectId);
+                if (!selectElement) return;
+                const triggerText = selectElement.querySelector('.custom-select__trigger span');
+                const options = selectElement.querySelectorAll('.custom-select__option');
+                let valueSet = false;
+                options.forEach(option => {
+                    if (option.dataset.value === value) {
+                        option.classList.add('selected');
+                        triggerText.textContent = option.textContent;
+                        valueSet = true;
+                    } else {
+                        option.classList.remove('selected');
+                    }
+                });
+                if (!valueSet && options.length > 0) {
+                    options[0].classList.add('selected');
+                    triggerText.textContent = options[0].textContent;
+                }
+            }
+
+
+            // --- JOB FORM LOGIC ---
+            function showJobForm(jobId = null) {
+                jobForm.reset();
+                const formTitle = document.getElementById('job-form-title');
+                const jobIdInput = document.getElementById('job-id-input');
+                if (jobId) {
+                    const job = jobs.find(j => j.id === jobId);
+                    if (job) {
+                        formTitle.textContent = 'Edit Job Listing';
+                        jobIdInput.value = job.id;
+                        document.getElementById('job-title').value = job.title;
+                        document.getElementById('job-status').value = job.status;
+                        setCustomSelectValue('job-status-select', job.status);
+                    }
+                } else {
+                    formTitle.textContent = 'Post a New Job';
+                    jobIdInput.value = '';
+                    document.getElementById('job-status').value = 'Active';
+                    setCustomSelectValue('job-status-select', 'Active');
+                }
+                showView('job-form-view');
+            }
+
+            function handleJobFormSubmit(e) {
+                e.preventDefault();
+                const jobId = document.getElementById('job-id-input').value;
+                const jobTitle = document.getElementById('job-title').value;
+                const jobStatus = document.getElementById('job-status').value;
+                if (jobId) {
+                    const jobIndex = jobs.findIndex(j => j.id == jobId);
+                    if (jobIndex > -1) {
+                        jobs[jobIndex].title = jobTitle;
+                        jobs[jobIndex].status = jobStatus;
+                    }
+                } else {
+                    const newJob = {
+                        id: Date.now(),
+                        title: jobTitle,
+                        status: jobStatus,
+                        posted: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                        views: 0
+                    };
+                    jobs.push(newJob);
+                }
+                renderJobs();
+                showView('jobs-view');
+            }
+            
+            // --- UNIVERSAL REFRESH FUNCTION ---
+            function refreshAllViews() {
+                updateDashboardStats();
+                renderJobs();
+                renderAllApplicants(currentAllApplicantsFilter);
+                renderSelectedApplicants(currentSelectedApplicantsFilter);
+                renderFilteredApplicants(['Rejected'], 'rejected-applicants-table-body');
+                if(currentJobIdForView) {
+                    renderApplicantsForJob(currentJobIdForView);
+                }
+            }
+
+            // --- APPLICANT STATUS UPDATE LOGIC ---
+            function updateApplicantStatus(applicantId, newStatus) {
+                const applicantIndex = applicants.findIndex(a => a.id == applicantId);
+                if (applicantIndex > -1) {
+                    applicants[applicantIndex].status = newStatus;
+                    refreshAllViews();
+                }
+            }
+
+            // NEW: Delete Job Function
+            function deleteJob(jobId) {
+                // Filter out the job to be deleted
+                jobs = jobs.filter(j => j.id !== jobId);
+                // Also filter out any applicants for that job
+                applicants = applicants.filter(a => a.appliedForJobId !== jobId);
+                // Refresh all views to reflect the changes
+                refreshAllViews();
+            }
+
+            // NEW: Mobile Sidebar Toggle Function
+            function toggleSidebar() {
+                dashboardSidebar.classList.toggle('active');
+                dashboardOverlay.classList.toggle('active');
+            }
+
+            // --- EVENT LISTENERS ---
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', () => mainNav.classList.toggle('active'));
+            }
+
+            // NEW: Listeners for mobile sidebar
+            if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebar);
+            if (dashboardOverlay) dashboardOverlay.addEventListener('click', toggleSidebar);
+
+            document.body.addEventListener('click', function(e) {
+                const shortlistBtn = e.target.closest('.shortlist-btn');
+                const rejectBtn = e.target.closest('.reject-btn');
+                const hireBtn = e.target.closest('.hire-btn');
+                const viewApplicantsBtn = e.target.closest('.view-applicants-btn');
+                const editJobBtn = e.target.closest('.edit-job-btn');
+                // NEW: Delete Job Button Listener
+                const deleteJobBtn = e.target.closest('.delete-job-btn');
+                
+                if (shortlistBtn) {
+                    const applicantId = shortlistBtn.dataset.applicantId;
+                    updateApplicantStatus(applicantId, 'Shortlisted');
+                }
+                if (rejectBtn) {
+                    const applicantId = rejectBtn.dataset.applicantId;
+                    updateApplicantStatus(applicantId, 'Rejected');
+                }
+                 if (hireBtn) {
+                    const applicantId = hireBtn.dataset.applicantId;
+                    updateApplicantStatus(applicantId, 'Hired');
+                }
+
+                if (viewApplicantsBtn) {
+                    const jobId = parseInt(viewApplicantsBtn.dataset.jobId, 10);
+                    renderApplicantsForJob(jobId);
+                }
+                 if (editJobBtn) {
+                    const jobId = parseInt(editJobBtn.dataset.jobId, 10);
+                    showJobForm(jobId);
+                }
+                // NEW: Handle Job Deletion
+                if (deleteJobBtn) {
+                    const jobId = parseInt(deleteJobBtn.dataset.jobId, 10);
+                    const job = jobs.find(j => j.id === jobId);
+                    if (confirm(`Are you sure you want to delete the job "${job.title}"?\nThis will also remove all its applicants.`)) {
+                        deleteJob(jobId);
+                    }
+                }
+            });
+            
+            document.getElementById('post-job-btn').addEventListener('click', () => showJobForm());
+            document.getElementById('cancel-job-form').addEventListener('click', () => showView('jobs-view'));
+            jobForm.addEventListener('submit', handleJobFormSubmit);
+
+            const backToJobsBtn = document.getElementById('back-to-jobs-btn');
+            if(backToJobsBtn) {
+                backToJobsBtn.addEventListener('click', () => showView('jobs-view'));
+            }
+
+            window.addEventListener('click', (e) => {
+                document.querySelectorAll('.custom-select').forEach(select => {
+                    if (!select.contains(e.target)) {
+                        select.classList.remove('open');
+                    }
+                });
+            });
+            
+            // --- CHART.JS INITIALIZATION ---
+            const ctx = document.getElementById('applicationChart');
+            if(ctx) {
+                new Chart(ctx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+                        datasets: [{
+                            label: 'Applications',
+                            data: [65, 59, 80, 81, 56, 55, 40, 90, 110, 75, 95, 120],
+                            backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            borderWidth: 1,
+                            borderRadius: 5
+                        }]
+                    },
+                    options: { scales: { y: { beginAtZero: true } }, responsive: true, plugins: { legend: { display: false } } }
+                });
+            }
+
+            // --- INITIAL LOAD ---
+            updateDashboardStats();
+            renderJobs();
+            renderAllApplicants();
+            renderSelectedApplicants();
+            renderFilteredApplicants(['Rejected'], 'rejected-applicants-table-body');
+            
+            setupCustomSelect('all-applicants-filter', renderAllApplicants);
+            setupCustomSelect('selected-applicants-filter', renderSelectedApplicants);
+            setupCustomSelect('job-status-select', (value) => {
+                document.getElementById('job-status').value = value;
+            });
+
+            showView('dashboard-view');
+        });
+    </script>
+</body>
+</html>

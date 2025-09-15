@@ -1,0 +1,109 @@
+{% extends 'jobs/base.html' %}
+{% load static %}
+
+{% block title %}Contact Us - Job Application Portal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'jobs/css/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+    <section class="page-header">
+        <h1>Get In Touch</h1>
+        <p>We're here to help. Whether you have a question, a suggestion, or need support, our team is ready to assist you.</p>
+    </section>
+
+    <section class="contact-info-section section-padding">
+        <div class="container">
+             <h2 class="section-title">Contact Information</h2>
+            <div class="contact-grid">
+                <div class="contact-card">
+                    <div class="icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <h3>Our Address</h3>
+                    <p>B-505, Pinnacle Business Park,<br>Prahlad Nagar, Ahmedabad, Gujarat 380015, India</p>
+                </div>
+                <div class="contact-card">
+                    <div class="icon"><i class="fas fa-envelope"></i></div>
+                    <p><h3>Email Us</h3><a href="mailto:support@jobportal.com">support@jobportal.com</a></p>
+                </div>
+                <div class="contact-card">
+                    <div class="icon"><i class="fas fa-phone-alt"></i></div>
+                    <p><h3>Call Us</h3><a href="tel:+917912345678">+91 79 1234 5678</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding">
+        <div class="container">
+            <div class="contact-main-section">
+                <div class="contact-form-wrapper">
+                    <h2>Send Us a Message</h2>
+                    <form action="#" method="POST"> {# Add method="POST" for forms #}
+                        {% csrf_token %} {# IMPORTANT: Django CSRF token for forms #}
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" name="name" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <input type="text" id="subject" name="subject" placeholder="e.g., Support Request" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" placeholder="Write your message here..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn">Send Message</button>
+                    </form>
+                </div>
+                <div class="map-wrapper">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14689.638971212278!2d72.5090098905273!3d23.00898808542284!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e9b3433a55555%3A0x2653a532785a21a5!2sPrahlad%20Nagar%2C%20Ahmedabad%2C%20Gujarat!5e0!3m2!1sen!2sin!4v1672922151659!5m2!1sen!2sin"
+                            allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq-section section-padding">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>How do I create an account?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>You can create an account by clicking the "Login" or "Sign Up" button in the top navigation bar. Simply follow the on-screen instructions to set up your profile.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>How can I post a job listing as an employer?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>If you're an employer looking to post a job, please navigate to the "For Employers" page and choose the "Post a Job" option. You will be guided through the process of creating a listing.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>I forgot my password. What should I do?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>On the login page, you will find a "Forgot Password?" link. Click it and enter your email address. We will send you instructions on how to reset your password.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'jobs/js/contact.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Application Portal</title>
+    <style>
+        /* General Styles */
+        :root {
+            --primary-color: #2c3e50; /* Dark Blue */
+            --secondary-color: #3498db; /* Bright Blue */
+            --light-color: #f8f9f9; /* Lighter Gray */
+            --dark-color: #212f3d;   /* Darker Blue */
+            --white-color: #ffffff;
+            --text-color: #34495e; /* Grayish Blue */
+            --text-light-color: #7f8c8d;
+            --border-color: #e0e0e0;
+            --tag-bg-color: #ecf0f1;
+
+            /* Fluid Typography */
+            --h1-size: clamp(2.2rem, 5vw, 3.2rem);
+            --h2-size: clamp(1.8rem, 4vw, 2.2rem);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+            background-color: var(--light-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 20px;
+        }
+
+        h1, h2, h3, h4 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .section-padding { padding: 60px 0; }
+        .section-title { text-align: center; margin-bottom: 50px; font-size: var(--h2-size); }
+
+        .btn {
+            display: inline-block;
+            background: var(--secondary-color);
+            color: var(--white-color);
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        .btn:hover { background: var(--primary-color); color: var(--white-color); }
+
+        /* Header */
+        .main-header {
+            background: var(--white-color);
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .main-header .container { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.8rem; font-weight: 700; color: var(--primary-color); text-decoration: none; }
+        .main-nav ul { display: flex; align-items: center; list-style: none; padding: 0; margin: 0; }
+        .main-nav ul li { margin-left: 25px; }
+        .main-nav ul li a { padding: 10px; font-weight: 500; color: var(--primary-color); text-decoration: none; transition: color 0.3s; }
+        .main-nav ul li a:hover { color: var(--secondary-color); }
+        .menu-toggle { display: none; cursor: pointer; font-size: 1.8rem; color: var(--primary-color); }
+
+        /* Login Button Style */
+        .main-nav .nav-btn {
+            background-color: var(--secondary-color);
+            color: var(--white-color);
+            padding: 9px 22px;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .main-nav .nav-btn:hover {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(44, 62, 80, 0.2);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative; height: 85vh; color: var(--white-color);
+            text-align: center; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; overflow: hidden;
+        }
+        .hero-slider .slide {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            opacity: 0; transition: opacity 1.5s ease; z-index: -2;
+        }
+        .hero-slider .slide.active { opacity: 1; }
+        .hero::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 62, 80, 0.7); z-index: -1;
+        }
+        .hero-content { z-index: 1; width: 100%; max-width: 950px; padding: 0 20px; }
+        .hero-content h1 { font-size: var(--h1-size); margin-bottom: 20px; color: var(--white-color); text-shadow: 2px 2px 8px rgba(0,0,0,0.5); }
+        .hero-content p { font-size: 1.2rem; margin-bottom: 50px; }
+
+        /* Search Form */
+        .search-form-wrapper {
+            display: flex; align-items: center; background: var(--white-color);
+            border-radius: 50px; padding: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .search-form-wrapper .search-icon { margin: 0 10px 0 15px; color: #999; font-size: 1.2rem; }
+        .search-input-group { display: flex; flex-grow: 1; }
+        .search-form-wrapper input {
+            border: none; background: transparent; outline: none;
+            font-family: 'Poppins', sans-serif; font-size: 1rem; color: var(--text-color);
+            padding: 10px; width: 100%;
+        }
+        #skills-input { flex-basis: 40%; }
+        #location-input { flex-basis: 30%; }
+        .search-form-wrapper .separator { width: 1px; height: 25px; background-color: #e0e0e0; margin: auto 10px; }
+        .search-form-wrapper button {
+            border: none; background: var(--secondary-color); color: var(--white-color);
+            font-size: 1rem; font-weight: 500; border-radius: 50px;
+            padding: 12px 35px; cursor: pointer; transition: background 0.3s; white-space: nowrap;
+        }
+        .search-form-wrapper button:hover { background: var(--primary-color); }
+
+        /* Custom Select Dropdown */
+        .custom-select-wrapper { position: relative; flex-basis: 30%; }
+        .select-selected { background-color: var(--white-color); color: var(--text-color); padding: 10px; cursor: pointer; user-select: none; }
+        .select-items {
+            position: absolute; background-color: var(--white-color);
+            top: 110%; left: 0; right: 0; z-index: 99;
+            border: 1px solid var(--border-color); border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-height: 200px; overflow-y: auto; display: none;
+            text-align: left;
+        }
+        .select-items div { color: var(--text-color); padding: 10px 15px; cursor: pointer; }
+        .select-items div:hover, .same-as-selected { background-color: var(--tag-bg-color); }
+
+        /* Why Choose Us Section */
+        .why-choose-us { background-color: var(--white-color); }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; text-align: center; }
+        .feature-card { padding: 30px; border-radius: 8px; transition: transform 0.3s, box-shadow 0.3s; }
+        .feature-card:hover { transform: translateY(-10px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .feature-card .icon { font-size: 3rem; color: var(--secondary-color); margin-bottom: 20px; }
+        .feature-card h3 { margin-bottom: 15px; font-size: 1.4rem; }
+
+        /* Top Companies Section */
+        .top-companies { background-color: var(--light-color); }
+        .company-scrollbar {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            -webkit-mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+        }
+        .company-scroll-content {
+            display: flex;
+            width: fit-content;
+            animation: scroll 40s linear infinite;
+        }
+        .company-scrollbar:hover .company-scroll-content {
+            animation-play-state: paused;
+        }
+        .company-logo {
+            height: 60px;
+            margin: 0 40px;
+            filter: grayscale(100%);
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+        .company-logo:hover {
+            filter: grayscale(0%);
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Browse By Category Section */
+        .job-categories { background-color: var(--white-color); }
+        .category-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        .category-card {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--white-color);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            transition: box-shadow 0.3s, border-color 0.3s;
+        }
+        .category-card:hover { box-shadow: 0 4px 15px rgba(44, 62, 80, 0.1); border-color: var(--secondary-color); }
+        .category-card-content { display: flex; align-items: center; }
+        .category-card .icon-wrapper {
+            height: 40px;
+            border-radius: 50%;
+            width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .category-card .icon-wrapper i { font-size: 1.1rem; color: var(--primary-color); }
+        .icon-bg-1 { background-color: #eaf2ff; }
+        .icon-bg-2 { background-color: #fff7e6; }
+        .icon-bg-3 { background-color: #e9f7f0; }
+        .icon-bg-4 { background-color: #fceee9; }
+        .icon-bg-5 { background-color: #e6f7ff; }
+        .icon-bg-6 { background-color: #f0eaff; }
+        .icon-bg-7 { background-color: #fff0f5; }
+        .icon-bg-8 { background-color: #f0f0f0; }
+        .category-card h4 { font-weight: 500; font-size: 1rem; color: var(--text-color); white-space: nowrap; }
+        .category-card .arrow {font-size: 1.2rem; color: #aab7c4; }
+
+        /* How It Works Section */
+        .how-it-works { background: var(--light-color); }
+        .steps-container { display: flex; justify-content: space-around; text-align: center; flex-wrap: wrap; }
+        .step { max-width: 300px; margin: 20px; }
+        .step .step-number {
+            width: 60px; height: 60px; background: var(--secondary-color); color: var(--white-color);
+            border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+            font-size: 2rem; font-weight: 700; margin-bottom: 20px;
+        }
+        .step h3 { margin-bottom: 10px; }
+
+        /* Latest Jobs Section */
+        .latest-jobs { background-color: var(--white-color); }
+        .job-listings { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+        .job-card {
+            background: var(--white-color); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 25px; transition: box-shadow 0.3s, transform 0.3s;
+            display: flex; flex-direction: column;
+        }
+        .job-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(44, 62, 80, 0.1); }
+        .job-card-header { display: flex; align-items: flex-start; margin-bottom: 15px; }
+        .job-card-header .logo {
+            width: 50px; height: 50px; border-radius: 8px; margin-right: 15px; flex-shrink: 0;
+            object-fit: contain; border: 1px solid var(--border-color);
+        }
+        .job-card-header .info h3 { font-size: 1.2rem; margin-bottom: 5px; }
+        .job-card-header .info .company { color: var(--text-light-color); font-weight: 500; }
+        .job-card .location { color: var(--text-light-color); margin-bottom: 20px; }
+        .job-card .tags .tag {
+            display: inline-block; background-color: var(--tag-bg-color); color: var(--text-light-color);
+            padding: 5px 12px; border-radius: 20px; font-size: 0.8rem;
+            margin-right: 8px; margin-bottom: 8px;
+        }
+        .job-card-footer {
+            margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .job-card-footer .posted-date { font-size: 0.9rem; color: var(--text-light-color); }
+        .job-card-footer .actions a { padding: 10px 20px; border-radius: 5px; font-weight: 500; text-decoration: none; }
+        .job-card-footer .actions .btn-apply { background-color: var(--secondary-color); color: var(--white-color); }
+        .view-more-btn-container { text-align: center; margin-top: 40px; }
+
+        /* Testimonials Section */
+        .testimonials { background: var(--primary-color); color: var(--white-color); overflow: hidden; }
+        .testimonials .section-title, .testimonials h4, .testimonials span { color: var(--white-color); }
+        .testimonial-slider { position: relative; max-width: 800px; margin: auto; padding: 0 40px; }
+        .testimonial-slides { display: flex; transition: transform 0.5s ease-in-out; }
+        .testimonial-card {
+            flex: 0 0 100%; box-sizing: border-box; text-align: center;
+            padding: 20px; opacity: 0; transition: opacity 0.5s ease-in-out; display: none;
+        }
+        .testimonial-card.active { opacity: 1; display: block; }
+        .testimonial-card .quote-icon { font-size: 2rem; color: var(--secondary-color); }
+        .testimonial-card p { font-size: 1.2rem; font-style: italic; margin: 20px 0; }
+        .testimonial-author img { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 15px; border: 3px solid var(--secondary-color); }
+        .testimonial-author h4 { font-size: 1.2rem; margin-bottom: 5px; }
+        .testimonial-nav {
+            position: absolute; top: 50%; transform: translateY(-50%); width: 100%;
+            left: 0; display: flex; justify-content: space-between;
+        }
+        .testimonial-nav .nav-arrow {
+            background: rgba(255, 255, 255, 0.1); border: none; color: var(--white-color);
+            cursor: pointer; font-size: 1.5rem; padding: 10px 15px;
+            border-radius: 50%; transition: background 0.3s;
+        }
+        .testimonial-nav .nav-arrow:hover { background: var(--secondary-color); }
+        .testimonial-dots { text-align: center; margin-top: 30px; }
+        .testimonial-dots .dot {
+            cursor: pointer; height: 12px; width: 12px; margin: 0 5px;
+            background-color: rgba(255, 255, 255, 0.4); border-radius: 50%;
+            display: inline-block; transition: background-color 0.3s;
+        }
+        .testimonial-dots .dot.active { background-color: var(--white-color); }
+
+        /* CTA Section */
+        .cta-section { background: var(--secondary-color); color: var(--white-color); text-align: center; }
+        .cta-section h2 { color: var(--white-color); font-size: 2rem; margin-bottom: 20px; }
+        .cta-section .btn { background: var(--white-color); color: var(--secondary-color); }
+
+        /* Footer */
+        .main-footer { background: var(--dark-color); color: var(--light-color); padding: 50px 0 20px; }
+        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        .footer-section h3 { margin-bottom: 20px; color: var(--white-color); }
+        .footer-section ul { padding: 0; list-style: none; }
+        .footer-section ul li { margin-bottom: 10px; }
+        .footer-section ul li a { color: var(--light-color); text-decoration: none; }
+        .footer-bottom { text-align: center; border-top: 1px solid #444; padding-top: 20px; }
+
+
+        /* --- RESPONSIVE STYLES --- */
+
+        /* Large Desktops (max-width: 1400px) */
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1320px;
+            }
+        }
+
+
+        /* Tablet Devices (max-width: 992px) */
+        @media(max-width: 992px) {
+            .section-title { font-size: 2rem; }
+            .hero-content p { font-size: 1.1rem; }
+
+            /* Collapse navigation for tablets */
+            .main-nav {
+                display: none;
+                width: 100%;
+                background: var(--white-color);
+                position: absolute;
+                top: 100%; /* Position below header */
+                left: 0;
+                background-color: rgba(255, 255, 255, 0.813);
+                box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            }
+            .main-nav.active { display: block; }
+            .main-nav ul { flex-direction: column; align-items: stretch; }
+            .main-nav ul li { margin: 0; width: 100%; text-align: center; }
+            .main-nav ul li a { display: block; padding: 15px; border-bottom: 1px solid var(--border-color); }
+            .main-nav .nav-btn {
+                display: block;
+                margin: 15px;
+                width: auto;
+            }
+            .menu-toggle { display: block; }
+
+            /* ===== SEARCH FORM FIXES START ===== */
+            .search-form-wrapper {
+                flex-direction: column;
+                border-radius: 10px;
+                padding: 20px;
+                gap: 15px;
+            }
+            .search-icon, .separator { display: none; }
+            .search-input-group {
+                flex-direction: column;
+                width: 100%;
+                gap: 15px;
+            }
+            .search-form-wrapper input, .select-selected {
+                width: 100%;
+                padding: 12px 15px;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                font-size: 1rem;
+                box-sizing: border-box;
+                color: var(--text-color);
+            }
+            .select-selected {
+                text-align: left;
+                line-height: normal;
+            }
+            .search-form-wrapper button {
+                width: 100%;
+                padding: 15px;
+                margin-top: 5px;
+                border-radius: 8px;
+            }
+        }
+
+        /* Mobile Devices (max-width: 768px) */
+        @media(max-width: 768px) {
+            .section-padding { padding: 40px 0; }
+            .hero { height: auto; min-height: 75vh; padding: 60px 0;}
+            .hero-content p { font-size: 1rem; margin-bottom: 30px; }
+
+            .company-logo { height: 45px; margin: 0 25px; }
+
+            .category-card h4 { font-size: 0.9rem; }
+            .category-card .icon-wrapper { margin-bottom: 10px; }
+
+            .job-listings { grid-template-columns: 1fr; } /* Stack job cards */
+
+            .testimonial-slider { padding: 0; }
+            .testimonial-nav { display: none; } /* Hide arrows on mobile */
+            .testimonial-card p { font-size: 1rem; }
+
+            .cta-section h2 { font-size: 1.6rem; }
+
+            .footer-content { text-align: center; }
+        }
+
+        /* Small Mobile Devices (max-width: 480px) */
+        @media (max-width: 480px) {
+            .hero-content p {
+                padding: 0 10px;
+            }
+
+            .search-form-wrapper {
+                padding: 15px;
+            }
+
+            .job-card {
+                padding: 20px;
+            }
+
+            .job-card-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .job-card-header .logo {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+
+            .job-card-footer {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container">
+            <a href="#" class="logo">JobPortal</a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="./findjobs.html">Find Jobs</a></li>
+                    <li><a href="./Companies.html">Companies</a></li>
+                    <li><a href="./aboutus.html">About Us</a></li>
+                    <li><a href="./contact.html">Contact</a></li>
+                    <li><a href="./foremployers.html">For Employers</a></li>
+                    <li><a href="" class="nav-btn">Login</a></li>
+                </ul>
+            </nav>
+            <div class="menu-toggle" id="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-slider">
+                <div class="slide active" style="background-image: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=2070&auto=format&fit=crop');"></div>
+                <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2232&auto=format&fit=crop');"></div>
+            </div>
+            <div class="hero-content">
+                <h1>Find Your Next Opportunity</h1>
+                <p>The easiest way to find your dream job and build your career.</p>
+                <div class="search-form-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <div class="search-input-group">
+                        <input type="text" id="skills-input" placeholder="Skills, designations, companies">
+                        <span class="separator"></span>
+                        <div class="custom-select-wrapper">
+                            <div class="select-selected">Select Experience</div>
+                            <div class="select-items"></div>
+                        </div>
+                        <span class="separator"></span>
+                        <input type="text" id="location-input" placeholder="Enter location">
+                    </div>
+                    <button type="submit">Search</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- The rest of your HTML remains unchanged... -->
+        <section class="why-choose-us section-padding">
+            <div class="container">
+                <h2 class="section-title">Why Choose Us?</h2>
+                <div class="features-grid">
+                    <div class="feature-card"><div class="icon"><i class="fas fa-search"></i></div><h3>Advanced Search</h3><p>Find the perfect job for you with our powerful filtering tools.</p></div>
+                    <div class="feature-card"><div class="icon"><i class="fas fa-building"></i></div><h3>Top Companies</h3><p>We partner with the best companies to bring you exclusive opportunities.</p></div>
+                    <div class="feature-card"><div class="icon"><i class="fas fa-user-friends"></i></div><h3>Career Guidance</h3><p>Get community support and expert advice to advance your career.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="top-companies section-padding">
+            <div class="container">
+                <h2 class="section-title">Top Companies Hiring</h2>
+                <div class="company-scrollbar">
+                    <div class="company-scroll-content">
+                        <img src="https://logo.clearbit.com/google.com" alt="Google Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/amazon.com" alt="Amazon Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/apple.com" alt="Apple Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/netflix.com" alt="Netflix Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/spotify.com" alt="Spotify Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/slack.com" alt="Slack Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/dropbox.com" alt="Dropbox Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/google.com" alt="Google Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/amazon.com" alt="Amazon Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/apple.com" alt="Apple Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/netflix.com" alt="Netflix Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/spotify.com" alt="Spotify Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/slack.com" alt="Slack Logo" class="company-logo">
+                        <img src="https://logo.clearbit.com/dropbox.com" alt="Dropbox Logo" class="company-logo">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="job-categories section-padding">
+            <div class="container">
+                <h2 class="section-title">Explore Top Categories</h2>
+                <div class="category-grid">
+                    <a href="#" class="category-card">
+                        <div class="category-card-content"><div class="icon-wrapper icon-bg-1"><i class="fas fa-home"></i></div><h4>Remote</h4></div><span class="arrow">&gt;</span>
+                    </a>
+                    <a href="#" class="category-card">
+                        <div class="category-card-content"><div class="icon-wrapper icon-bg-2"><i class="fas fa-building"></i></div><h4>MNC</h4></div><span class="arrow">&gt;</span>
+                    </a>
+                    <a href="#" class="category-card">
+                        <div class="category-card-content"><div class="icon-wrapper icon-bg-5"><i class="fas fa-cog"></i></div><h4>Engineering</h4></div><span class="arrow">&gt;</span>
+                    </a>
+                    <a href="#" class="category-card">
+                        <div class="category-card-content"><div class="icon-wrapper icon-bg-2"><i class="fas fa-users"></i></div><h4>HR</h4></div><span class="arrow">&gt;</span>
+                    </a>
+                    <a href="#" class="category-card">
+                        <div class="category-card-content"><div class="icon-wrapper icon-bg-5"><i class="fas fa-briefcase"></i></div><h4>Sales</h4></div><span class="arrow">&gt;</span>
+                    </a>
+                    <a href="#" class="category-card">
+                        <div class="category-card-content"><div class="icon-wrapper icon-bg-1"><i class="fas fa-rupee-sign"></i></div><h4>Banking & Finance</h4></div><span class="arrow">&gt;</span>
+                    </a>
+                    <a href="#" class="category-card">
+                        <div class="category-card-content"><div class="icon-wrapper icon-bg-1"><i class="fas fa-rocket"></i></div><h4>Startup</h4></div><span class="arrow">&gt;</span>
+                    </a>
+                    <a href="#" class="category-card">
+                        <div class="category-card-content"><div class="icon-wrapper icon-bg-1"><i class="fas fa-chart-line"></i></div><h4>Marketing</h4></div><span class="arrow">&gt;</span>
+                    </a>
+                    <a href="#" class="category-card">
+                        <div class="category-card-content"><div class="icon-wrapper icon-bg-2"><i class="fas fa-check-circle"></i></div><h4>Project Manager</h4></div><span class="arrow">&gt;</span>
+                    </a>
+                    <a href="#" class="category-card">
+                        <div class="category-card-content"><div class="icon-wrapper icon-bg-5"><i class="fas fa-chart-bar"></i></div><h4>Analytics</h4></div><span class="arrow">&gt;</span>
+                    </a>
+                    <a href="#" class="category-card">
+                        <div class="category-card-content"><div class="icon-wrapper icon-bg-1"><i class="fas fa-box"></i></div><h4>Supply Ch...</h4></div><span class="arrow">&gt;</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="how-it-works section-padding">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <div class="steps-container">
+                    <div class="step"><div class="step-number">1</div><h3>Create an Account</h3><p>Sign up and create your professional profile in minutes.</p></div>
+                    <div class="step"><div class="step-number">2</div><h3>Search for Jobs</h3><p>Use our advanced search to find jobs that match your skills.</p></div>
+                    <div class="step"><div class="step-number">3</div><h3>Apply with a Click</h3><p>Apply to your dream job and get hired!</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="latest-jobs section-padding">
+            <div class="container">
+                <h2 class="section-title">Latest Job Listings</h2>
+                <div class="job-listings">
+                    <!-- Job Card 1: Updated -->
+                    <div class="job-card">
+                        <div class="job-card-header"><img src="https://logo.clearbit.com/stripe.com" alt="Stripe Logo" class="logo"><div class="info"><h3>Frontend Developer</h3><span class="company">Stripe</span></div></div>
+                        <div class="location"><i class="fas fa-map-marker-alt"></i> New York, NY</div><div class="tags"><span class="tag">Full-time</span><span class="tag">React</span><span class="tag">JavaScript</span></div>
+                        <div class="job-card-footer"><span class="posted-date">Posted 2 days ago</span><div class="actions"><a href="#" class="btn btn-apply">Apply Now</a></div></div>
+                    </div>
+                    <!-- Job Card 2: Updated -->
+                    <div class="job-card">
+                        <div class="job-card-header"><img src="https://logo.clearbit.com/figma.com" alt="Figma Logo" class="logo"><div class="info"><h3>UX/UI Designer</h3><span class="company">Figma</span></div></div>
+                        <div class="location"><i class="fas fa-map-marker-alt"></i> San Francisco, CA</div><div class="tags"><span class="tag">Full-time</span><span class="tag">Remote Option</span><span class="tag">Figma</span></div>
+                        <div class="job-card-footer"><span class="posted-date">Posted 5 days ago</span><div class="actions"><a href="#" class="btn btn-apply">Apply Now</a></div></div>
+                    </div>
+                    <!-- Job Card 3: Updated -->
+                     <div class="job-card">
+                        <div class="job-card-header"><img src="https://logo.clearbit.com/atlassian.com" alt="Atlassian Logo" class="logo"><div class="info"><h3>Project Manager</h3><span class="company">Atlassian</span></div></div>
+                        <div class="location"><i class="fas fa-map-marker-alt"></i> Chicago, IL</div><div class="tags"><span class="tag">Full-time</span><span class="tag">Agile</span><span class="tag">Jira</span></div>
+                        <div class="job-card-footer"><span class="posted-date">Posted 1 week ago</span><div class="actions"><a href="#" class="btn btn-apply">Apply Now</a></div></div>
+                    </div>
+                    <!-- Job Card 4: Updated -->
+                    <div class="job-card">
+                        <div class="job-card-header"><img src="https://logo.clearbit.com/spotify.com" alt="Spotify Logo" class="logo"><div class="info"><h3>Data Scientist</h3><span class="company">Spotify</span></div></div>
+                        <div class="location"><i class="fas fa-map-marker-alt"></i> Boston, MA</div><div class="tags"><span class="tag">Full-time</span><span class="tag">Python</span><span class="tag">Machine Learning</span></div>
+                        <div class="job-card-footer"><span class="posted-date">Posted 3 days ago</span><div class="actions"><a href="#" class="btn btn-apply">Apply Now</a></div></div>
+                    </div>
+                    <!-- Job Card 5: Updated -->
+                    <div class="job-card">
+                        <div class="job-card-header"><img src="https://logo.clearbit.com/twilio.com" alt="Twilio Logo" class="logo"><div class="info"><h3>Backend Engineer</h3><span class="company">Twilio</span></div></div>
+                        <div class="location"><i class="fas fa-map-marker-alt"></i> Remote</div><div class="tags"><span class="tag">Full-time</span><span class="tag">Node.js</span><span class="tag">AWS</span></div>
+                        <div class="job-card-footer"><span class="posted-date">Posted 8 days ago</span><div class="actions"><a href="#" class="btn btn-apply">Apply Now</a></div></div>
+                    </div>
+                    <!-- Job Card 6: Updated -->
+                     <div class="job-card">
+                        <div class="job-card-header"><img src="https://logo.clearbit.com/hubspot.com" alt="HubSpot Logo" class="logo"><div class="info"><h3>HR Manager</h3><span class="company">HubSpot</span></div></div>
+                        <div class="location"><i class="fas fa-map-marker-alt"></i> Austin, TX</div><div class="tags"><span class="tag">Full-time</span><span class="tag">Recruiting</span><span class="tag">Onboarding</span></div>
+                        <div class="job-card-footer"><span class="posted-date">Posted 10 days ago</span><div class="actions"><a href="#" class="btn btn-apply">Apply Now</a></div></div>
+                    </div>
+                </div>
+                <div class="view-more-btn-container"><a href="#" class="btn">View More Jobs</a></div>
+            </div>
+        </section>
+
+        <section class="testimonials section-padding">
+            <div class="container">
+                <h2 class="section-title">What Our Users Say</h2>
+                <div class="testimonial-slider">
+                    <div class="testimonial-slides">
+                        <div class="testimonial-card active">
+                            <i class="fas fa-quote-left quote-icon"></i>
+                            <p>This platform helped me find my dream job in just a few weeks. The process was so simple and efficient!</p>
+                            <div class="testimonial-author"><img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User Photo"><div><h4>Jane Doe</h4><span>Frontend Developer</span></div></div>
+                        </div>
+                        <div class="testimonial-card">
+                            <i class="fas fa-quote-left quote-icon"></i>
+                            <p>As an employer, I was able to find qualified candidates quickly. The quality of applicants is outstanding. I highly recommend this portal.</p>
+                            <div class="testimonial-author"><img src="https://i.pravatar.cc/150?u=a042581f4e29026704e" alt="User Photo"><div><h4>John Smith</h4><span>HR Manager at Innovate Corp</span></div></div>
+                        </div>
+                        <div class="testimonial-card">
+                             <i class="fas fa-quote-left quote-icon"></i>
+                            <p>The career guidance and resources are top-notch. It's more than just a job board; it's a career-building community.</p>
+                            <div class="testimonial-author"><img src="https://i.pravatar.cc/150?u=a042581f4e29026704f" alt="User Photo"><div><h4>Emily White</h4><span>UX/UI Designer</span></div></div>
+                        </div>
+                    </div>
+                    <div class="testimonial-nav">
+                        <button class="nav-arrow" id="prev-testimonial">&lt;</button>
+                        <button class="nav-arrow" id="next-testimonial">&gt;</button>
+                    </div>
+                </div>
+                 <div class="testimonial-dots"></div>
+            </div>
+        </section>
+
+        <section class="cta-section section-padding">
+            <div class="container">
+                <h2>Ready to take the next step?</h2>
+                <p>Create an account to start applying for jobs or post a job to find the best talent.</p>
+                <a href="#" class="btn">Get Started Now</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section"><h3>About Us</h3><p>We are dedicated to connecting talented individuals with their dream jobs.</p></div>
+                <div class="footer-section"><h3>Quick Links</h3><ul><li><a href="#">Jobs</a></li><li><a href="#">Companies</a></li><li><a href="#">About</a></li></ul></div>
+                <div class="footer-section"><h3>Follow Us</h3><ul><li><a href="#">Facebook</a></li><li><a href="#">Twitter</a></li><li><a href="#">LinkedIn</a></li></ul></div>
+            </div>
+            <div class="footer-bottom"><p>&copy; 2025 Job Application Portal. All rights reserved.</p></div>
+        </div>
+    </footer>
+
+    <script>
+        // --- MOBILE MENU ---
+        const menuToggle = document.getElementById('mobile-menu');
+        const mainNav = document.querySelector('.main-nav');
+        menuToggle.addEventListener('click', () => mainNav.classList.toggle('active'));
+
+        // --- HERO SLIDER ---
+        const slides = document.querySelectorAll('.hero-slider .slide');
+        let currentSlide = 0;
+        const nextSlide = () => {
+            if (slides.length === 0) return;
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        };
+        setInterval(nextSlide, 5000);
+
+        // --- CUSTOM SELECT DROPDOWN ---
+        const selectWrapper = document.querySelector('.custom-select-wrapper');
+        if (selectWrapper) {
+            const selectedDisplay = selectWrapper.querySelector('.select-selected');
+            const optionsContainer = selectWrapper.querySelector('.select-items');
+            const options = ['Fresher', '1 Year', '2 Years', '3 Years', '4 Years', '5 Years', '6 Years', '7 Years', '8 Years', '9 Years', '10 Years', '10+ Years'];
+
+            options.forEach(optionText => {
+                const optionDiv = document.createElement('div');
+                optionDiv.textContent = optionText;
+                // ===== JAVASCRIPT FIX: Corrected syntax from "(). {" to "() => {" =====
+                optionDiv.addEventListener('click', () => {
+                    selectedDisplay.textContent = optionText;
+                    optionsContainer.style.display = 'none';
+                    optionsContainer.querySelectorAll('div').forEach(opt => opt.classList.remove('same-as-selected'));
+                    optionDiv.classList.add('same-as-selected');
+                });
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            selectedDisplay.addEventListener('click', e => {
+                e.stopPropagation();
+                optionsContainer.style.display = optionsContainer.style.display === 'block' ? 'none' : 'block';
+            });
+
+            window.addEventListener('click', e => {
+                if (!selectWrapper.contains(e.target)) {
+                    optionsContainer.style.display = 'none';
+                }
+            });
+        }
+
+        // --- TESTIMONIAL SLIDER ---
+        const testimonialSlides = document.querySelectorAll('.testimonial-card');
+        const dotsContainer = document.querySelector('.testimonial-dots');
+        let currentTestimonial = 0;
+        let testimonialInterval;
+
+        function createDots() {
+            if (!dotsContainer) return;
+            dotsContainer.innerHTML = ''; // Clear existing dots
+            testimonialSlides.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => {
+                    showTestimonial(i);
+                    resetInterval();
+                });
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        function updateDots() {
+            const dots = document.querySelectorAll('.testimonial-dots .dot');
+            if (dots.length === 0) return;
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentTestimonial);
+            });
+        }
+
+        function showTestimonial(index) {
+            if (testimonialSlides.length === 0) return;
+            testimonialSlides.forEach(slide => slide.classList.remove('active'));
+            currentTestimonial = (index + testimonialSlides.length) % testimonialSlides.length;
+            testimonialSlides[currentTestimonial].classList.add('active');
+            updateDots();
+        }
+
+        function resetInterval() {
+            clearInterval(testimonialInterval);
+            testimonialInterval = setInterval(() => showTestimonial(currentTestimonial + 1), 4000);
+        }
+
+        if (testimonialSlides.length > 0) {
+            createDots();
+            const nextBtn = document.getElementById('next-testimonial');
+            const prevBtn = document.getElementById('prev-testimonial');
+
+            if (nextBtn && prevBtn) {
+                nextBtn.addEventListener('click', () => {
+                    showTestimonial(currentTestimonial + 1);
+                    resetInterval();
+                });
+                prevBtn.addEventListener('click', () => {
+                    showTestimonial(currentTestimonial - 1);
+                    resetInterval();
+                });
+            }
+            resetInterval(); // Start the automatic slide
+        }
+    </script>
+</body>
+</html>
