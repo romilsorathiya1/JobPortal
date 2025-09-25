@@ -8,7 +8,7 @@ urlpatterns = [
     path('companies/', views.companies, name='companies'),
     path('about-us/', views.about_us, name='about_us'),
     path('contact/', views.contact, name='contact'),
-    path('foremployers/', views.employer_dashboard, name='foremployers'),
+    path('foremployers/', views.foremployers, name='foremployers'),
     # path('admin-panel/', views.admin_panel, name='admin_panel'),
 
     # Add these placeholder URLs for authentication (will point to actual Django auth views later)

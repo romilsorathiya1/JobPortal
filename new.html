@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Q&A Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .message-box {
+            position: fixed;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1000;
+            background-color: #fff;
+        }
+        .message-box.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+<div class="container bg-white rounded-3xl shadow-xl p-8 space-y-8">
+    <h1 class="text-3xl font-bold text-gray-800 text-center">Document Q&A Tool</h1>
+    <p class="text-center text-gray-600">Upload a plain text document, then ask questions about its content. The tool will use the provided text to generate an answer.</p>
+
+    <!-- File Upload Section -->
+    <div class="space-y-4">
+        <label for="documentUpload" class="block text-gray-700 font-medium">Upload Document (TXT file):</label>
+        <div class="flex items-center space-x-4">
+            <input type="file" id="documentUpload" accept=".txt" class="block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-blue-50 file:text-blue-700
+                hover:file:bg-blue-100 cursor-pointer">
+            <button id="clearBtn" class="bg-red-500 text-white font-semibold py-2 px-4 rounded-full shadow-md hover:bg-red-600 transition-colors">Clear</button>
+        </div>
+        <div id="fileStatus" class="text-sm text-gray-500">No file uploaded.</div>
+    </div>
+
+    <!-- Question Section -->
+    <div class="space-y-4">
+        <label for="questionInput" class="block text-gray-700 font-medium">Ask a Question:</label>
+        <textarea id="questionInput" rows="3" class="w-full p-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow resize-none" placeholder="Enter your question here..."></textarea>
+        <button id="askBtn" class="w-full bg-blue-600 text-white font-semibold py-3 px-6 rounded-2xl shadow-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300" disabled>Get Answer</button>
+    </div>
+
+    <!-- Answer Section -->
+    <div class="space-y-4">
+        <label class="block text-gray-700 font-medium">Answer:</label>
+        <div id="answerBox" class="w-full p-4 min-h-[150px] bg-gray-50 rounded-xl border border-gray-300 text-gray-800 break-words whitespace-pre-wrap">
+            <p class="text-gray-500 italic">Your answer will appear here.</p>
+        </div>
+        <div id="loadingIndicator" class="hidden text-center text-gray-500">
+            <div class="animate-spin inline-block w-8 h-8 border-4 border-t-4 border-blue-500 rounded-full"></div>
+            <p class="mt-2">Thinking...</p>
+        </div>
+    </div>
+
+    <!-- Message Box -->
+    <div id="messageBox" class="message-box"></div>
+</div>
+
+<script>
+    const fileInput = document.getElementById('documentUpload');
+    const questionInput = document.getElementById('questionInput');
+    const askBtn = document.getElementById('askBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const fileStatus = document.getElementById('fileStatus');
+    const answerBox = document.getElementById('answerBox');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const messageBox = document.getElementById('messageBox');
+
+    let uploadedText = '';
+
+    // Function to show a temporary message
+    function showMessage(message, type = 'info') {
+        messageBox.textContent = message;
+        messageBox.className = `message-box show text-white ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
+        setTimeout(() => {
+            messageBox.className = 'message-box';
+        }, 3000);
+    }
+
+    // Handle file upload
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                uploadedText = e.target.result;
+                fileStatus.textContent = `File loaded: ${file.name}`;
+                askBtn.disabled = false;
+                showMessage(`Successfully uploaded "${file.name}"`, 'success');
+            };
+            reader.readAsText(file);
+        } else {
+            uploadedText = '';
+            fileStatus.textContent = 'No file uploaded.';
+            askBtn.disabled = true;
+        }
+    });
+
+    // Handle clear button
+    clearBtn.addEventListener('click', () => {
+        fileInput.value = null;
+        uploadedText = '';
+        fileStatus.textContent = 'No file uploaded.';
+        askBtn.disabled = true;
+        answerBox.innerHTML = '<p class="text-gray-500 italic">Your answer will appear here.</p>';
+        questionInput.value = '';
+        showMessage('Document and question cleared.', 'info');
+    });
+
+    // Handle API call
+    askBtn.addEventListener('click', async () => {
+        const question = questionInput.value.trim();
+        if (!uploadedText) {
+            showMessage('Please upload a document first.', 'error');
+            return;
+        }
+        if (!question) {
+            showMessage('Please enter a question.', 'error');
+            return;
+        }
+
+        // Display loading state
+        answerBox.innerHTML = '';
+        loadingIndicator.classList.remove('hidden');
+        askBtn.disabled = true;
+
+        try {
+            // Build the prompt with the document content as context
+            const prompt = `You are a helpful Q&A assistant. Answer the following question STRICTLY and ONLY using the provided text. Do not use any outside knowledge. If the answer is not in the text, say "I'm sorry, I cannot find the answer in the provided document."
+
+            Document:
+            ---
+            ${uploadedText}
+            ---
+
+            Question: ${question}`;
+            
+            const chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                console.error('API Error:', error);
+                throw new Error(`API Error: ${response.status} ${response.statusText}`);
+            }
+
+            const result = await response.json();
+
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                const text = result.candidates[0].content.parts[0].text;
+                answerBox.textContent = text;
+            } else {
+                answerBox.textContent = "I'm sorry, I couldn't get a valid response from the model. Please try again.";
+            }
+
+        } catch (error) {
+            console.error('Fetch error:', error);
+            answerBox.textContent = "An error occurred while fetching the answer. Please try again later.";
+            showMessage('An error occurred.', 'error');
+        } finally {
+            // Re-enable button and hide loading state
+            loadingIndicator.classList.add('hidden');
+            askBtn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

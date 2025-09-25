@@ -168,7 +168,7 @@
                     <li><a href="{% url 'companies' %}" {% if request.resolver_match.url_name == 'companies' %}class="active"{% endif %}>Companies</a></li>
                     <li><a href="{% url 'about_us' %}" {% if request.resolver_match.url_name == 'about_us' %}class="active"{% endif %}>About Us</a></li>
                     <li><a href="{% url 'contact' %}" {% if request.resolver_match.url_name == 'contact' %}class="active"{% endif %}>Contact</a></li>
-                    <li><a href="{% url 'employer_dashboard' %}" {% if request.resolver_match.url_name == 'employer_dashboard' %}class="active"{% endif %}>For Employers</a></li>
+                    <li><a href="{% url 'foremployers' %}" {% if request.resolver_match.url_name == 'employer_dashboard' %}class="active"{% endif %}>For Employers</a></li>
                     <li><a href="#" class="nav-btn">Login</a></li> {# This link will now open the modal #}
                 </ul>
             </nav>
@@ -248,14 +248,14 @@
     </div>
     {# END AUTHENTICATION MODAL HTML #}
 
-    <script>
+    <!-- <script>
         // --- MOBILE MENU (Already present in base.html) ---
         const menuToggle = document.getElementById('mobile-menu');
         const mainNav = document.querySelector('.main-nav');
         if (menuToggle) {
             menuToggle.addEventListener('click', () => mainNav.classList.toggle('active'));
         }
-    </script>
+    </script> -->
     <script src="{% static 'jobs/js/auth_modal.js' %}"></script> {# Link the new modal JS #}
     {% block extra_js %}{% endblock %}
 </body>
